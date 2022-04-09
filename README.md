@@ -1,2 +1,2 @@
-# configurator
-Typescript Config loader and maanger 
+# configmon
+Config loader and manager

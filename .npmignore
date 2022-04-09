@@ -1,0 +1,10 @@
+/src/
+/.vscode/
+/node_modules/
+.eslintrc
+.gitignore
+eslintRules.js
+jest.config.js
+pnpm-lock.yaml
+tsconfig.json
+tsconfig.build.json

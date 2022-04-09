@@ -1,0 +1,13 @@
+{
+  "root": true, // this is optional
+  "env": {
+    "node": true,   // for projects running in node
+    "browser": true // for web projects that run in a browser
+  },
+  "ignorePatterns": [
+    "/dist"  // put your build directory here so eslint ignores built files
+  ],
+  "extends": [
+    "./eslintRules.js"
+  ]
+}
