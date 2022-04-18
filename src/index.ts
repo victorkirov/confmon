@@ -1,34 +1,4 @@
-import fs from 'fs'
-import { merge, reReference } from 'statesis'
-
-import { parseFile } from './parser'
 import cf from './compiler'
-
-const configDirectory = process.env.CONFMON_PATH || './config'
-
-const getConfig = () => {
-  const configFiles = fs.readdirSync(configDirectory)
-  return configFiles.reduce((acc, file) => {
-    const filePath = `${configDirectory}/${file}`
-
-    return merge(acc, parseFile(filePath))
-  }, {})
-}
-
-let current = getConfig()
-console.log(current)
-
-fs.watch(configDirectory, (eventType, filename) => {
-  console.log(eventType)
-  console.log(filename)
-
-  const newConfig = reReference(current, getConfig())
-  console.log(newConfig)
-  console.log(newConfig === current)
-  console.log((newConfig as any).database === (current as any).database)
-
-  current = newConfig
-})
 
 const configSchema = {
   server: {
@@ -42,7 +12,10 @@ const configSchema = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const myConfig = cf.compile(configSchema)
 
-console.log(myConfig)
+myConfig.server.then(serverValue => console.log('Server: ', serverValue))
+myConfig.server.host.then(serverHostValue => console.log('Host: ', serverHostValue))
+
+// myConfig.server.onChange(newServerValue => console.log('Server changed: ', newServerValue))
 /*
 // How to get from API or custom func?
 const configSchema = {
@@ -79,6 +52,7 @@ const configSchema = {
 const options = {
   validate: true,
   throwOnError: true,
+  strict, // ???? Only allow specified values and throw on any unrecognised ones
   onError: (err) => { console.log(err) },
 }
 
@@ -91,6 +65,12 @@ config.onError((err) => { console.log(err) })
 
 const endSubscription = config.on.server.change((newValue) => {})
 const endSubscription2 = config.on.server.host.change((newValue) => {})
+
+const configValue = await config.get.server.host
+const endSubscription2 = config.on.server.host.change((newValue) => {})
+// or
+const configValue = await config.server.host.val()
+const endSubscription2 = config.server.host.onChange((newValue) => {})
 
 endSubscription()
 */

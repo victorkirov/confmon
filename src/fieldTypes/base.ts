@@ -5,7 +5,7 @@ type FromFuncOptions = {
 export type TypeOptions<T> = {
   isRequired: boolean
   defaultValue?: T
-  fromFunc?: () => Promise<T>
+  fromFunc?: () => Promise<T> // TODO: Add config as arg
   fromFuncOptions?: FromFuncOptions | undefined
 }
 
@@ -55,7 +55,7 @@ export class BaseType<T> {
   }
 
   /** @internal */
-  compile = (): this => {
+  eject = (): this => {
     this.isEjected = true
     return this
   }

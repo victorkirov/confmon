@@ -1,83 +1,51 @@
+import fs from 'fs'
+import { merge, reReference } from 'statesis'
+
+import { parseFile } from './parser'
+
 import {
-  BaseType,
   PortType,
   StringType,
 } from '../fieldTypes'
+import { compileConfig } from './config'
+import { ConvertToSubscribableSchema, Schema } from './types'
 
-type Schema = Record<string, PortType | StringType | ChildSchema>
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface ChildSchema extends Schema {}
+const compile = <T extends Schema>(schema: T): ConvertToSubscribableSchema<T> => {
+  const compiledConfig = compileConfig(schema)
 
-type Primitive = string | number | boolean | bigint | symbol | null | undefined
-type Expand<T> = T extends Primitive ? T : { [K in keyof T]: T[K] }
+  const configDirectory = process.env.CONFMON_PATH || './config'
 
-type RequiredKeys<T> = {
-  [K in keyof T]: T[K] extends { nullable: false } | Schema ?
-    K : never
-}[keyof T]
+  const getConfig = () => {
+    const configFiles = fs.readdirSync(configDirectory)
+    return configFiles.reduce((acc, file) => {
+      const filePath = `${configDirectory}/${file}`
 
-type OptionalKeys<T> = {
-  [K in keyof T]: T[K] extends { nullable: false } ? never : K;
-}[keyof T]
-
-type ConvertSchema<T extends Schema> = Expand<{
-  [K in RequiredKeys<T>]-?: K extends keyof T ?
-    T[K] extends BaseType<infer U> ?
-      U
-      : T[K] extends Schema ?
-        ConvertSchema<T[K]>
-        : never
-    : never
-} & {
-  [K in OptionalKeys<T>]?: K extends keyof T ?
-    T[K] extends BaseType<infer U> ?
-      U
-      : T[K] extends Schema ?
-        ConvertSchema<T[K]>
-        : never
-    : never
-}>
-
-class ObjectType extends BaseType<object> {
-  children: { [key: string]: ObjectType | StringType | PortType } = {}
-
-  protected schema!: Schema
-
-  constructor(schema: Schema) {
-    super()
-    this.schema = schema
+      return merge(acc, parseFile(filePath))
+    }, {})
   }
 
-  compile = (): this => {
-    super.compile()
+  let current = getConfig()
+  compiledConfig.applyValue(current)
 
-    for (const [key, child] of Object.entries(this.schema)) {
-      if (child instanceof BaseType) {
-        this.children[key] = child.compile()
-      } else {
-        this.children[key] = new ObjectType(child).compile()
-      }
-    }
+  fs.watch(configDirectory, (_eventType, _filename) => {
+    // console.log(eventType)
+    // console.log(filename)
 
-    return this
-  }
-}
+    const newConfig = reReference(current, getConfig())
+    // console.log(newConfig)
+    // console.log(newConfig === current)
+    // console.log((newConfig as any).database === (current as any).database)
 
-const compileSchema = (schema: Schema): ObjectType => {
-  return new ObjectType(schema).compile()
-}
+    current = newConfig
 
-const compile = <T extends Schema>(schema: T): ConvertSchema<T> => {
-  const compiledSchema = compileSchema(schema)
+    compiledConfig.applyValue(current)
+  })
 
-  // TODO: read (initialise) config here and setup directory/file watchers
-  // TODO: Implement converted schema from compiled
-
-  return compiledSchema as unknown as ConvertSchema<T>
+  return compiledConfig as any
 }
 
 export default {
+  compile,
   asString: () => new StringType(),
   asPort: () => new PortType(),
-  compile,
 }
