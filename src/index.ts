@@ -14,7 +14,7 @@ const myConfig = cf.compile(configSchema)
 
 myConfig.server.then(serverValue => console.log('Server: ', serverValue))
 myConfig.server.host.then(serverHostValue => console.log('Host: ', serverHostValue))
-
+myConfig.temp.then(tempValue => console.log('Temp: ', tempValue))
 // myConfig.server.onChange(newServerValue => console.log('Server changed: ', newServerValue))
 /*
 // How to get from API or custom func?

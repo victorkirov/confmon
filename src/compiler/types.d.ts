@@ -31,15 +31,15 @@ export type ExtractSchemaAsPrimitives<T extends Schema> = Expand<{
 } & {
   [K in OptionalKeys<T>]?: K extends keyof T ?
     T[K] extends BaseType<infer U> ?
-      U
+      U | null | undefined
       : T[K] extends Schema ?
         ExtractSchemaAsPrimitives<T[K]>
         : never
     : never
 }>
 
-type Subscribable<T> = PromiseLike<ExtractSchemaAsPrimitives<T>> & {
-  onChange: (callback: (value: ExtractSchemaAsPrimitives<T>) => void) => void
+type Subscribable<T> = PromiseLike<T extends Primitive ? T : ExtractSchemaAsPrimitives<T>> & {
+  onChange: (callback: (value: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>) => void) => void
 }
 
 export type ConvertToSubscribableSchema<T extends Schema> = Expand<{
@@ -51,7 +51,7 @@ export type ConvertToSubscribableSchema<T extends Schema> = Expand<{
         : never
     : never
 } & {
-  [K in OptionalKeys<T>]?: K extends keyof T ?
+  [K in OptionalKeys<T>]-?: K extends keyof T ?
     T[K] extends BaseType<infer U> ?
       Subscribable<U>
       : T[K] extends Schema ?

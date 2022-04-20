@@ -55,9 +55,9 @@ export abstract class BaseType<T> {
   }
 
   /** @internal */
-  eject = (): this => {
+  eject = (): TypeOptions<T>  => {
     this.isEjected = true
-    return this
+    return this.options
   }
 
   /** @internal */

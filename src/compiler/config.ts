@@ -1,9 +1,21 @@
-import { BaseType } from '../fieldTypes'
+import { EventEmitter } from 'stream'
+import { BaseType, TypeOptions } from '../fieldTypes'
 
 import { ExtractSchemaAsPrimitives, Schema } from './types'
 
 abstract class BaseSubscribablePromiseHandler<T> {
+  /** @internal */
   abstract __getValue(): Promise<T>
+  /** @internal */
+  abstract __applyValue(value: unknown): void
+  /** @internal */
+  abstract __isRequired(): boolean
+
+  protected __emitter: EventEmitter
+
+  constructor() {
+    this.__emitter = new EventEmitter()
+  }
 
   then = function (
     this: BaseSubscribablePromiseHandler<T>,
@@ -18,32 +30,58 @@ abstract class BaseSubscribablePromiseHandler<T> {
     return getValuePromise
   }
 
-  onChange = () => {
-    // TODO: Implement. Look into eventemitter as well
+  onConfChange = (onChangeCallback: (newValue: T, oldValue: T) => void) => {
+    this.__emitter.on(
+      'change',
+      (newValue: T, oldValue: T) => {
+        onChangeCallback(newValue, oldValue)
+      },
+    )
   }
 }
 
 class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHandler<U> {
-  private typeController!: T
+  private typeController: T
 
-  value!: U
+  private typeOptions: TypeOptions<U>
+
+  private value!: U
+
 
   constructor(typeController:  T) {
     super()
 
     this.typeController = typeController
+    this.typeOptions = typeController.eject()
   }
 
-  __applyValue = (value: unknown): void => {
-    if (this.value === value) return
+  /** @internal */
+  __applyValue = (newValue: unknown): void => {
+    if (this.value === newValue) return
 
-    this.value = this.typeController.validate(value)
+    const oldValue = this.value
 
-    // TODO: fire onChange event
+    if (newValue === null || newValue === undefined) {
+      if (this.typeOptions.isRequired) {
+        throw new Error('Config value is required')
+      }
+
+      this.value = newValue as unknown as U
+    } else {
+      this.value = this.typeController.validate(newValue)
+    }
+
+    this.__emitter.emit('change', newValue, oldValue)
   }
 
+  /** @internal */
   __getValue = async (): Promise<U> => {
     return this.value
+  }
+
+  /** @internal */
+  __isRequired = (): boolean => {
+    return this.typeOptions.isRequired
   }
 
   // TODO: Look at BaseType's options and check if 'from' func is populated, use if it is
@@ -58,6 +96,8 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
         : never
   }
 
+  private value!: ExtractSchemaAsPrimitives<T>
+
   constructor(schema: T) {
     super()
 
@@ -66,33 +106,54 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
     for (const key of Object.keys(schema) as (keyof T)[]) {
       const child = schema[key] as T[typeof key]
       if (child instanceof BaseType) {
-        this.children[key] = new ConfigLeafNode(child.eject() as any) as any
-        Object.defineProperty(
-          this,
-          key,
-          {
-            get: function () { return this.children[key] },
-          },
-        )
+        this.children[key] = new ConfigLeafNode(child as any) as any
       } else {
         this.children[key] = new ConfigBranchNode(child) as any
-        Object.defineProperty(
-          this,
-          key,
-          {
-            get: function () { return this.children[key] },
-          },
-        )
+      }
+      Object.defineProperty(
+        this,
+        key,
+        {
+          get: function () { return this.children[key] },
+        },
+      )
+    }
+  }
+
+  /** @internal */
+  __validateValueHasExpectedStructure = (value: unknown): value is Record<keyof T, unknown> => {
+    if (typeof value !== 'object' || value === null) {
+      throw new Error(`Expected config object, got ${typeof value}`)
+    }
+
+    const keys = Object.keys(this.children) as (keyof T)[]
+
+    for (const key of keys) {
+      if (!(key in value) && this.children[key].__isRequired()) {
+        throw new Error(`Key ${key} missing in config object ${JSON.stringify(value)}`)
       }
     }
+
+    return true
   }
 
-  __applyValue = (value: any): void => {
-    for (const key of Object.keys(this.children) as (keyof T)[]) {
-      this.children[key].__applyValue(value[key])
+  /** @internal */
+  __applyValue = (newValue: unknown): void => {
+    if (newValue === this.value) return
+
+    if (this.__validateValueHasExpectedStructure(newValue)) {
+      for (const key of Object.keys(this.children) as (keyof T)[]) {
+        this.children[key].__applyValue(newValue[key])
+      }
+
+      const oldValue = this.value
+      this.value = newValue as unknown as ExtractSchemaAsPrimitives<T>
+
+      this.__emitter.emit('change', newValue, oldValue)
     }
   }
 
+  /** @internal */
   __getValue = async (): Promise<ExtractSchemaAsPrimitives<T>> => {
     const result: any = {}
 
@@ -101,6 +162,11 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
     }
 
     return result as ExtractSchemaAsPrimitives<T>
+  }
+
+  /** @internal */
+  __isRequired = (): boolean => {
+    return Object.values(this.children).some(child => child.__isRequired())
   }
 }
 
