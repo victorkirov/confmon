@@ -25,7 +25,7 @@ const compile = <T extends Schema>(schema: T): ConvertToSubscribableSchema<T> =>
   }
 
   let current = getConfig()
-  compiledConfig.applyValue(current)
+  compiledConfig.__applyValue(current)
 
   fs.watch(configDirectory, (_eventType, _filename) => {
     // console.log(eventType)
@@ -38,7 +38,7 @@ const compile = <T extends Schema>(schema: T): ConvertToSubscribableSchema<T> =>
 
     current = newConfig
 
-    compiledConfig.applyValue(current)
+    compiledConfig.__applyValue(current)
   })
 
   return compiledConfig as any

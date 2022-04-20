@@ -9,7 +9,7 @@ export type TypeOptions<T> = {
   fromFuncOptions?: FromFuncOptions | undefined
 }
 
-export class BaseType<T> {
+export abstract class BaseType<T> {
   protected options: TypeOptions<T> = {
     isRequired: false,
   }
@@ -61,5 +61,5 @@ export class BaseType<T> {
   }
 
   /** @internal */
-  validate = (_value: unknown) => {}
+  abstract validate: (_value: unknown) => T
 }
