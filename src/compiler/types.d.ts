@@ -1,6 +1,6 @@
 import {
-  BaseType,
   AllTypes,
+  BaseType,
 } from '../fieldTypes'
 
 export type Schema = Record<string, AllTypes | ChildSchema>
