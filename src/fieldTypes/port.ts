@@ -1,12 +1,8 @@
-import { BaseType } from './base'
+import { NumberType } from './number'
 
-export class PortType extends BaseType<number> {
-  validate = (value: unknown): number => {
-    const numberValue = Number(value)
-
-    if (Number.isNaN(numberValue)) {
-      throw new Error(`${this.constructor.name} must be a valid number`)
-    }
+export class PortType extends NumberType {
+  validate(this: PortType, value: unknown): number {
+    const numberValue = super.validate(value)
 
     if (numberValue < 0 || numberValue > 65535) {
       throw new Error(`${this.constructor.name} must be between 0 and 65535`)

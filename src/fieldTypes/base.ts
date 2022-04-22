@@ -5,7 +5,7 @@ type FromFuncOptions = {
 export type TypeOptions<T> = {
   isRequired: boolean
   defaultValue?: T
-  fromFunc?: () => Promise<T> // TODO: Add config as arg
+  fromFunc?: () => Promise<T>
   fromFuncOptions?: FromFuncOptions | undefined
 }
 
@@ -16,13 +16,13 @@ export abstract class BaseType<T> {
 
   protected isEjected = false
 
-  protected ejectedGate = () => {
+  protected ejectedGate() {
     if (this.isEjected) {
       throw new Error('Cannot modify field after config compilation')
     }
   }
 
-  required = <BT extends this & { default: never; nullable: false }>(): BT => {
+  required<BT extends this & { default: never; nullable: false }>(): BT {
     this.ejectedGate()
 
     if (this.options.defaultValue) {
@@ -33,7 +33,7 @@ export abstract class BaseType<T> {
     return this as BT
   }
 
-  default = <BT extends this & { required: never; nullable: false }>(value: T): BT => {
+  default<BT extends this & { required: never; nullable: false }>(value: T): BT {
     this.ejectedGate()
 
     if (this.options.isRequired) {
@@ -45,7 +45,7 @@ export abstract class BaseType<T> {
     return this as BT
   }
 
-  from = (fromFunc: () => Promise<T>, options?: FromFuncOptions): this => {
+  from(fromFunc: () => Promise<T>, options?: FromFuncOptions): this {
     this.ejectedGate()
 
     this.options.fromFunc = fromFunc
@@ -55,11 +55,11 @@ export abstract class BaseType<T> {
   }
 
   /** @internal */
-  eject = (): TypeOptions<T>  => {
+  eject(): TypeOptions<T>  {
     this.isEjected = true
     return this.options
   }
 
   /** @internal */
-  abstract validate: (_value: unknown) => T
+  abstract validate(_value: unknown): T
 }

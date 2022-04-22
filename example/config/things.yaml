@@ -1,0 +1,11 @@
+database:
+  version: 8
+  connection:
+    user: user
+    password: userPassword
+    database: system
+report:
+  title: Exec Summary
+  emailTo:
+    - bob@cat.com
+    - slo@joe.net

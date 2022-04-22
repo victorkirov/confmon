@@ -6,6 +6,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "rimraf ./lib && tsc -p tsconfig.build.json",
+    "example": "CONFMON_PATH=./example/config ts-node example/index.ts",
     "audit": "NODE_ENV=production check-audit",
     "test": "jest --coverage --config ./jest.config.js",
     "lint": "eslint . --ext .ts"
@@ -44,6 +45,7 @@
     "npm-audit-resolver": "^3.0.0-7",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.1.4",
+    "ts-node": "^10.7.0",
     "typescript": "^4.6.3"
   },
   "dependencies": {

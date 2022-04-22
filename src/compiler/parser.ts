@@ -31,10 +31,26 @@ const parseXml = (stringData: string): Record<string, unknown> => {
 const parseYaml = (stringData: string): Record<string, unknown> => (yaml.parse(stringData))
 
 const parseVal = (stringData: string, filename: string): Record<string, unknown> => {
-  // TODO
-  return {
-    [filename]: stringData,
+  const breadcrumbs = filename.split('|')
+  const fieldName = breadcrumbs.pop()
+
+  if (!fieldName) {
+    throw new Error(`Invalid filename for .confval extension: ${filename}`)
   }
+
+  const parsedConfig = {} as Record<string, unknown>
+  let current = parsedConfig
+
+  for (const breadcrumb of breadcrumbs) {
+    if (!(breadcrumb in current)) {
+      current[breadcrumb] = {}
+    }
+    current = current[breadcrumb]  as Record<string, unknown>
+  }
+
+  current[fieldName] = stringData
+
+  return parsedConfig
 }
 
 const extensionToParserMapping: Record<string, (stringData: string, filename: string) => Record<string, unknown>> = {
@@ -46,7 +62,40 @@ const extensionToParserMapping: Record<string, (stringData: string, filename: st
   toml: parseToml,
   xml: parseXml,
   yaml: parseYaml,
-  val: parseVal,
+  confval: parseVal,
+}
+
+const isObject = (value: unknown): value is Record<string, unknown> => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value)
+  )
+}
+
+const processEnv = <T extends Record<string, unknown>>(config: T): T => {
+  const envConfig = {} as T
+
+  for (const key of Object.keys(config) as (keyof T)[]) {
+    const value = config[key]
+    if (isObject(value)) {
+      envConfig[key] = processEnv(value)
+    } else if (typeof value === 'string') {
+      const match = value.match(/^\$\{(.*)\}$/)
+      if (match && match[1]) {
+        const envKey = match[1]
+        if (process.env[envKey]) {
+          envConfig[key] = process.env[envKey] as any
+        }
+      } else {
+        envConfig[key] = value
+      }
+    } else {
+      envConfig[key] = value
+    }
+  }
+
+  return envConfig
 }
 
 export const parseFile = (filePath: string): Record<string, unknown> => {
@@ -65,5 +114,11 @@ export const parseFile = (filePath: string): Record<string, unknown> => {
 
   const data = fs.readFileSync(filePath, 'utf-8')
 
-  return parser(data, filename)
+  const parsedData =  parser(data, filename)
+
+  if (filename.endsWith('.env')) {
+    return processEnv(parsedData)
+  }
+
+  return parsedData
 }

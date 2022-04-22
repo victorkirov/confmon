@@ -17,7 +17,7 @@ abstract class BaseSubscribablePromiseHandler<T> {
     this.__emitter = new EventEmitter()
   }
 
-  then = function (
+  then(
     this: BaseSubscribablePromiseHandler<T>,
     callback: (
       (value: T) => T | PromiseLike<T>
@@ -30,13 +30,16 @@ abstract class BaseSubscribablePromiseHandler<T> {
     return getValuePromise
   }
 
-  onConfChange = (onChangeCallback: (newValue: T, oldValue: T) => void) => {
-    this.__emitter.on(
-      'change',
-      (newValue: T, oldValue: T) => {
-        onChangeCallback(newValue, oldValue)
-      },
-    )
+  confListen(onChangeCallback: (newValue: T, oldValue: T) => void): () => void {
+    this.__emitter.on('change', onChangeCallback)
+
+    return () => {
+      this.confRemoveListener(onChangeCallback)
+    }
+  }
+
+  confRemoveListener(onChangeCallback: (newValue: T, oldValue: T) => void): void {
+    this.__emitter.removeListener('change', onChangeCallback)
   }
 }
 
@@ -56,7 +59,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   }
 
   /** @internal */
-  __applyValue = (newValue: unknown): void => {
+  __applyValue(newValue: unknown): void {
     if (this.value === newValue) return
 
     const oldValue = this.value
@@ -75,12 +78,12 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   }
 
   /** @internal */
-  __getValue = async (): Promise<U> => {
+  async __getValue(): Promise<U> {
     return this.value
   }
 
   /** @internal */
-  __isRequired = (): boolean => {
+  __isRequired(): boolean {
     return this.typeOptions.isRequired
   }
 
@@ -121,7 +124,7 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
   }
 
   /** @internal */
-  __validateValueHasExpectedStructure = (value: unknown): value is Record<keyof T, unknown> => {
+  __validateValueHasExpectedStructure(value: unknown): value is Record<keyof T, unknown> {
     if (typeof value !== 'object' || value === null) {
       throw new Error(`Expected config object, got ${typeof value}`)
     }
@@ -138,7 +141,7 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
   }
 
   /** @internal */
-  __applyValue = (newValue: unknown): void => {
+  __applyValue(newValue: unknown): void {
     if (newValue === this.value) return
 
     if (this.__validateValueHasExpectedStructure(newValue)) {
@@ -154,7 +157,7 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
   }
 
   /** @internal */
-  __getValue = async (): Promise<ExtractSchemaAsPrimitives<T>> => {
+  async __getValue(): Promise<ExtractSchemaAsPrimitives<T>> {
     const result: any = {}
 
     for (const [key, child] of Object.entries(this.children)) {
@@ -165,7 +168,7 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
   }
 
   /** @internal */
-  __isRequired = (): boolean => {
+  __isRequired(): boolean {
     return Object.values(this.children).some(child => child.__isRequired())
   }
 }

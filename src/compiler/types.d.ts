@@ -38,8 +38,11 @@ export type ExtractSchemaAsPrimitives<T extends Schema> = Expand<{
     : never
 }>
 
+type UnsubscribeFunction = () => void
+
 type Subscribable<T> = PromiseLike<T extends Primitive ? T : ExtractSchemaAsPrimitives<T>> & {
-  onChange: (callback: (value: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>) => void) => void
+  confListen: (callback: (value: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>) => void) => UnsubscribeFunction
+  confRemoveListener: (callback: (value: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>) => void) => void
 }
 
 export type ConvertToSubscribableSchema<T extends Schema> = Expand<{
