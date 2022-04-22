@@ -1,4 +1,14 @@
 export { BaseType, TypeOptions } from './base'
-export { NumberType } from './number'
-export { PortType } from './port'
-export { StringType } from './string'
+import { NumberType } from './number'
+import { ObjectType } from './object'
+import { PortType } from './port'
+import { StringType } from './string'
+
+export type AllTypes = NumberType | PortType | StringType | ObjectType
+
+export {
+  NumberType,
+  ObjectType,
+  PortType,
+  StringType,
+}

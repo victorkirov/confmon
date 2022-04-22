@@ -1,10 +1,9 @@
 import {
   BaseType,
-  PortType,
-  StringType,
+  AllTypes,
 } from '../fieldTypes'
 
-export type Schema = Record<string, PortType | StringType | ChildSchema>
+export type Schema = Record<string, AllTypes | ChildSchema>
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ChildSchema extends Schema {}
 

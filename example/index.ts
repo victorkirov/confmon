@@ -1,3 +1,5 @@
+// NOTE: Node 17 is needed to run the below example for the fetch API
+import axios from 'axios'
 import cf from '../src'
 
 console.log('ENV HOSTTYPE: ', process.env.HOSTTYPE)
@@ -12,6 +14,12 @@ const configSchema = {
   fromVal: {
     innerVal: cf.asString().required(),
   },
+  catFacts: cf.asObject().from(async () => {
+    const resp = await axios.get('https://catfact.ninja/fact')
+    return resp.data
+  }, {
+    pollInterval: 2000,
+  })
 }
 
 const myConfig = cf.compile(configSchema)
@@ -20,9 +28,11 @@ myConfig.server.then(serverValue => console.log('Server: ', serverValue))
 myConfig.server.host.then(serverHostValue => console.log('Host: ', serverHostValue))
 myConfig.temp.then(tempValue => console.log('Temp: ', tempValue))
 myConfig.hostType.then(tempValue => console.log('Host Type: ', tempValue))
+myConfig.catFacts.then(tempValue => console.log('Cat facts: ', tempValue.fact)) // TODO: fix typing or get rid of object type
 myConfig.fromVal.innerVal.then(tempValue => console.log('Custom Val File: ', tempValue))
 
 myConfig.server.confListen(newServerValue => console.log('Server changed: ', newServerValue))
+myConfig.catFacts.confListen(newCatFactsValue => console.log('Cat facts changed: ', newCatFactsValue.fact))
 /*
 // How to get from API or custom func?
 const configSchema = {

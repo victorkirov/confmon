@@ -48,6 +48,8 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
   private typeOptions: TypeOptions<U>
 
+  private retrievePromise?: Promise<void> | undefined
+
   private value!: U
 
 
@@ -56,6 +58,18 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
     this.typeController = typeController
     this.typeOptions = typeController.eject()
+
+    if (this.typeOptions.fromFunc) {
+      // TODO: Improve this and add error handling
+      const callFromFunc = () => this.typeOptions.fromFunc?.().then(value => this.__applyValue(value))
+      this.retrievePromise = callFromFunc()
+
+      if (this.typeOptions.fromFuncOptions?.pollInterval) {
+        setInterval(async () => {
+          this.retrievePromise = callFromFunc()
+        }, this.typeOptions.fromFuncOptions.pollInterval)
+      }
+    }
   }
 
   /** @internal */
@@ -79,6 +93,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
   /** @internal */
   async __getValue(): Promise<U> {
+    await this.retrievePromise
     return this.value
   }
 
@@ -86,8 +101,6 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   __isRequired(): boolean {
     return this.typeOptions.isRequired
   }
-
-  // TODO: Look at BaseType's options and check if 'from' func is populated, use if it is
 }
 
 class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<ExtractSchemaAsPrimitives<T>> {

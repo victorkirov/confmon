@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "rootDir": "./src",
+    "rootDir": ".",
     "baseUrl": "./src",
     "resolveJsonModule": true,
     "declaration": true,
@@ -22,6 +22,7 @@
     "exactOptionalPropertyTypes": true,
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
-    "stripInternal": true
-  }
+    "stripInternal": true,
+  },
+  "include": ["src/**/*"]
 }

@@ -6,7 +6,6 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "rimraf ./lib && tsc -p tsconfig.build.json",
-    "example": "CONFMON_PATH=./example/config ts-node example/index.ts",
     "audit": "NODE_ENV=production check-audit",
     "test": "jest --coverage --config ./jest.config.js",
     "lint": "eslint . --ext .ts"
@@ -33,9 +32,9 @@
     "@types/cson": "^7.20.1",
     "@types/hjson": "^2.4.3",
     "@types/jest": "^27.4.1",
-    "@types/node": "^17.0.24",
-    "@typescript-eslint/eslint-plugin": "^5.19.0",
-    "@typescript-eslint/parser": "^5.19.0",
+    "@types/node": "^17.0.25",
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
     "eslint": "^8.13.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
@@ -45,7 +44,6 @@
     "npm-audit-resolver": "^3.0.0-7",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.1.4",
-    "ts-node": "^10.7.0",
     "typescript": "^4.6.3"
   },
   "dependencies": {
@@ -57,6 +55,6 @@
     "statesis": "^0.2.2",
     "toml": "^3.0.0",
     "x2js": "^3.4.3",
-    "yaml": "^2.0.0"
+    "yaml": "^2.0.1"
   }
 }

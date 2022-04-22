@@ -1,4 +1,5 @@
 type FromFuncOptions = {
+  /** ms */
   pollInterval?: number
 }
 
