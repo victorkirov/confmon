@@ -1,4 +1,4 @@
-# ConfigMon &middot; [![GitHub license](https://img.shields.io/badge/license-GNU-blue.svg)](https://github.com/victorkirov/configmon/blob/main/LICENSE) [![npm version](https://img.shields.io/npm/v/confmon.svg?style=flat)](https://www.npmjs.com/package/confmon)
+# ConfigMon &middot; [![GitHub license](https://img.shields.io/badge/license-GNU-blue.svg)](https://github.com/victorkirov/configmon/blob/main/LICENSE) [![npm version](https://img.shields.io/npm/v/configmon.svg?style=flat)](https://www.npmjs.com/package/confmon)
 
 Config loading and monitoring solution
 
