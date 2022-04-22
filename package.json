@@ -1,5 +1,5 @@
 {
-  "name": "configmon",
+  "name": "confmon",
   "version": "0.0.1-alpha.1",
   "license": "GNU GPLv3",
   "description": "Config loading and monitoring solution",
@@ -10,14 +10,14 @@
     "test": "jest --coverage --config ./jest.config.js",
     "lint": "eslint . --ext .ts"
   },
-  "homepage": "https://github.com/victorkirov/configmon#readme",
+  "homepage": "https://github.com/victorkirov/confmon#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/victorkirov/configmon.git"
+    "url": "git+https://github.com/victorkirov/confmon.git"
   },
   "author": "Victor Kirov",
   "bugs": {
-    "url": "https://github.com/victorkirov/configmon/issues"
+    "url": "https://github.com/victorkirov/confmon/issues"
   },
   "keywords": [
     "configuration",
