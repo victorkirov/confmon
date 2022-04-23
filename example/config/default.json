@@ -19,5 +19,6 @@
   },
   "jwt": {
     "secret": "secret"
-  }
+  },
+  "then": "there"
 }

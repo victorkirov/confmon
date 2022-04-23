@@ -6,8 +6,9 @@ type FromFuncOptions = {
 export type TypeOptions<T> = {
   isRequired: boolean
   defaultValue?: T
-  fromFunc?: () => Promise<T>
+  fromFunc?: () => Promise<T> | T
   fromFuncOptions?: FromFuncOptions | undefined
+  fromKey?: string
 }
 
 export abstract class BaseType<T> {
@@ -46,19 +47,31 @@ export abstract class BaseType<T> {
     return this as BT
   }
 
-  from(fromFunc: () => Promise<T>, options?: FromFuncOptions): this {
+  from<BT extends this & { fromKey: never }>(
+    fromFunc: () => Promise<T> | T, options?: FromFuncOptions,
+  ): BT {
     this.ejectedGate()
 
     this.options.fromFunc = fromFunc
     this.options.fromFuncOptions = options
 
-    return this
+    return this as BT
+  }
+
+  fromKey<BT extends this & { from: never }>(
+    key: string,
+  ): BT {
+    this.ejectedGate()
+
+    this.options.fromKey = key
+
+    return this as BT
   }
 
   /** @internal */
   eject(): TypeOptions<T>  {
     this.isEjected = true
-    return this.options
+    return { ...this.options }
   }
 
   /** @internal */

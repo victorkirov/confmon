@@ -7,6 +7,8 @@ abstract class BaseSubscribablePromiseHandler<T> {
   /** @internal */
   abstract __getValue(): Promise<T>
   /** @internal */
+  abstract __getOverrideKey(): string | undefined
+  /** @internal */
   abstract __applyValue(value: unknown): void
   /** @internal */
   abstract __isRequired(): boolean
@@ -63,7 +65,10 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
     if (this.typeOptions.fromFunc) {
       // TODO: Improve this and add error handling
-      const callFromFunc = () => this.typeOptions.fromFunc?.().then(value => this.__applyValue(value))
+      const callFromFunc = () => new Promise(resolve =>{
+        resolve(this.typeOptions.fromFunc?.())
+      }).then(value => this.__applyValue(value))
+
       this.retrievePromise = callFromFunc()
 
       if (this.typeOptions.fromFuncOptions?.pollInterval) {
@@ -95,6 +100,11 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
     }
 
     this.__emitter.emit('change', newValue, oldValue)
+  }
+
+  /** @internal */
+  __getOverrideKey(): string | undefined {
+    return this.typeOptions.fromKey
   }
 
   /** @internal */
@@ -175,7 +185,9 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
 
     if (this.__validateValueHasExpectedStructure(newValue)) {
       for (const key of Object.keys(this.__children) as (keyof T)[]) {
-        this.__children[key].__applyValue(newValue[key])
+        const child = this.__children[key]
+        const lookupKey = child.__getOverrideKey() ?? key  as keyof T
+        child.__applyValue(newValue[lookupKey])
       }
 
       const oldValue = this.__value
@@ -183,6 +195,11 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
 
       this.__emitter.emit('change', newValue, oldValue)
     }
+  }
+
+  /** @internal */
+  __getOverrideKey(): undefined {
+    return undefined
   }
 
   /** @internal */

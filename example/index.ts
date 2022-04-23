@@ -18,10 +18,12 @@ const configSchema = {
   }, {
     pollInterval: 2000,
   }),
+  thenSurrogate: cf.asString().fromKey('then')
 }
 
 const myConfig = cf.compile(configSchema)
 
+console.log('Then Surrogate Sync: ', myConfig.thenSurrogate.getSync())
 console.log('Server Sync: ', myConfig.server.getSync())
 myConfig.server.then(serverValue => console.log('Server: ', serverValue))
 myConfig.server.host.then(serverHostValue => console.log('Host: ', serverHostValue))
