@@ -4,9 +4,9 @@ import { merge, reReference } from 'statesis'
 import { parseFile } from './parser'
 
 import { compileConfig } from './config'
-import { ConvertToSubscribableSchema, Schema } from './types'
+import { ConvertToSubscribableSchema, NonReserved, Schema } from './types'
 
-export const compile = <T extends Schema>(schema: T): ConvertToSubscribableSchema<T> => {
+export const compile = <T extends Schema>(schema: NonReserved<T>): ConvertToSubscribableSchema<T> => {
   const compiledConfig = compileConfig(schema)
 
   const configDirectory = process.env.CONFMON_PATH || './config'

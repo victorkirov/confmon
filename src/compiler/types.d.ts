@@ -3,6 +3,12 @@ import {
   BaseType,
 } from '../fieldTypes'
 
+type ReservedKeys = 'then' | 'confListen' | 'confRemoveListener'
+
+export type NonReserved<T> = T extends Primitive ? T : {
+  [K in keyof T]: K extends ReservedKeys ? never : NonReserved<T[K]>
+}
+
 export type Schema = Record<string, AllTypes | ChildSchema>
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ChildSchema extends Schema {}

@@ -2,8 +2,6 @@
 import axios from 'axios'
 import cf from '../src'
 
-console.log('ENV HOSTTYPE: ', process.env.HOSTTYPE)
-
 const configSchema = {
   server: {
     host: cf.asString().required(),
@@ -19,7 +17,7 @@ const configSchema = {
     return resp.data
   }, {
     pollInterval: 2000,
-  })
+  }),
 }
 
 const myConfig = cf.compile(configSchema)
@@ -33,6 +31,7 @@ myConfig.fromVal.innerVal.then(tempValue => console.log('Custom Val File: ', tem
 
 myConfig.server.confListen(newServerValue => console.log('Server changed: ', newServerValue))
 myConfig.catFacts.confListen(newCatFactsValue => console.log('Cat facts changed: ', newCatFactsValue.fact))
+
 /*
 // How to get from API or custom func?
 const configSchema = {
