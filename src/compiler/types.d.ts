@@ -3,7 +3,7 @@ import {
   BaseType,
 } from '../fieldTypes'
 
-type ReservedKeys = 'then' | 'confListen' | 'confRemoveListener'
+type ReservedKeys = 'then' | 'confListen' | 'confRemoveListener' | 'getSync'
 
 export type NonReserved<T> = T extends Primitive ? T : {
   [K in keyof T]: K extends ReservedKeys ? never : NonReserved<T[K]>
@@ -48,6 +48,7 @@ type UnsubscribeFunction = () => void
 type Subscribable<T> = PromiseLike<T extends Primitive ? T : ExtractSchemaAsPrimitives<T>> & {
   confListen: (callback: (value: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>) => void) => UnsubscribeFunction
   confRemoveListener: (callback: (value: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>) => void) => void
+  getSync: () => T extends Primitive ? T : ExtractSchemaAsPrimitives<T>
 }
 
 export type ConvertToSubscribableSchema<T extends Schema> = Expand<{

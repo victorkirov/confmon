@@ -22,6 +22,7 @@ const configSchema = {
 
 const myConfig = cf.compile(configSchema)
 
+console.log('Server Sync: ', myConfig.server.getSync())
 myConfig.server.then(serverValue => console.log('Server: ', serverValue))
 myConfig.server.host.then(serverHostValue => console.log('Host: ', serverHostValue))
 myConfig.temp.then(tempValue => console.log('Temp: ', tempValue))

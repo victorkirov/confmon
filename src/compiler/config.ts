@@ -11,6 +11,8 @@ abstract class BaseSubscribablePromiseHandler<T> {
   /** @internal */
   abstract __isRequired(): boolean
 
+  abstract getSync(): T
+
   protected __emitter: EventEmitter
 
   constructor() {
@@ -72,6 +74,10 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
     }
   }
 
+  getSync(): U {
+    return this.value
+  }
+
   /** @internal */
   __applyValue(newValue: unknown): void {
     if (this.value === newValue) return
@@ -130,10 +136,20 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
         this,
         key,
         {
-          get: function () { return this.children[key] },
+          get: function () { return this.__children[key] },
         },
       )
     }
+  }
+
+  getSync(): ExtractSchemaAsPrimitives<T> {
+    const result: any = {}
+
+    for (const [key, child] of Object.entries(this.__children)) {
+      result[key] = child.getSync()
+    }
+
+    return result as ExtractSchemaAsPrimitives<T>
   }
 
   /** @internal */
