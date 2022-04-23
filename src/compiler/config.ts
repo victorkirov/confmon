@@ -67,7 +67,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
       // TODO: Improve this and add error handling
       const callFromFunc = () => new Promise(resolve =>{
         resolve(this.typeOptions.fromFunc?.())
-      }).then(value => this.__applyValue(value))
+      }).then(value => this.__applyValueInternal(value))
 
       this.retrievePromise = callFromFunc()
 
@@ -85,6 +85,13 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
   /** @internal */
   __applyValue(newValue: unknown): void {
+    // Only the fromFunc call will set this value
+    if (this.typeOptions.fromFunc) return
+
+    this.__applyValueInternal(newValue)
+  }
+
+  __applyValueInternal(newValue: unknown): void {
     if (this.value === newValue) return
 
     const oldValue = this.value
