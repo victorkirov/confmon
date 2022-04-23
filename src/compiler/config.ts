@@ -104,7 +104,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 }
 
 class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<ExtractSchemaAsPrimitives<T>> {
-  children: {
+  __children: {
     [K in keyof T]: T[K] extends Schema ?
       ConfigBranchNode<T[K]>
       : T[K] extends BaseType<infer U> ?
@@ -112,19 +112,19 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
         : never
   }
 
-  private value!: ExtractSchemaAsPrimitives<T>
+  private __value!: ExtractSchemaAsPrimitives<T>
 
   constructor(schema: T) {
     super()
 
-    this.children = {} as any
+    this.__children = {} as any
 
     for (const key of Object.keys(schema) as (keyof T)[]) {
       const child = schema[key] as T[typeof key]
       if (child instanceof BaseType) {
-        this.children[key] = new ConfigLeafNode(child as any) as any
+        this.__children[key] = new ConfigLeafNode(child as any) as any
       } else {
-        this.children[key] = new ConfigBranchNode(child) as any
+        this.__children[key] = new ConfigBranchNode(child) as any
       }
       Object.defineProperty(
         this,
@@ -142,10 +142,10 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
       throw new Error(`Expected config object, got ${typeof value}`)
     }
 
-    const keys = Object.keys(this.children) as (keyof T)[]
+    const keys = Object.keys(this.__children) as (keyof T)[]
 
     for (const key of keys) {
-      if (!(key in value) && this.children[key].__isRequired()) {
+      if (!(key in value) && this.__children[key].__isRequired()) {
         throw new Error(`Key ${key} missing in config object ${JSON.stringify(value)}`)
       }
     }
@@ -155,15 +155,15 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
 
   /** @internal */
   __applyValue(newValue: unknown): void {
-    if (newValue === this.value) return
+    if (newValue === this.__value) return
 
     if (this.__validateValueHasExpectedStructure(newValue)) {
-      for (const key of Object.keys(this.children) as (keyof T)[]) {
-        this.children[key].__applyValue(newValue[key])
+      for (const key of Object.keys(this.__children) as (keyof T)[]) {
+        this.__children[key].__applyValue(newValue[key])
       }
 
-      const oldValue = this.value
-      this.value = newValue as unknown as ExtractSchemaAsPrimitives<T>
+      const oldValue = this.__value
+      this.__value = newValue as unknown as ExtractSchemaAsPrimitives<T>
 
       this.__emitter.emit('change', newValue, oldValue)
     }
@@ -173,7 +173,7 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
   async __getValue(): Promise<ExtractSchemaAsPrimitives<T>> {
     const result: any = {}
 
-    for (const [key, child] of Object.entries(this.children)) {
+    for (const [key, child] of Object.entries(this.__children)) {
       result[key] = await child.__getValue()
     }
 
@@ -182,7 +182,7 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
 
   /** @internal */
   __isRequired(): boolean {
-    return Object.values(this.children).some(child => child.__isRequired())
+    return Object.values(this.__children).some(child => child.__isRequired())
   }
 }
 
