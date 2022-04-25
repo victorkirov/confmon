@@ -12,6 +12,23 @@ Please note, this library is still in alpha phase, so the interface and usage ca
 - Tests, tests, tests
 - Figure out when errors are thrown and how they should be handled
 
+## Contents
+- [Why ConfMon?](#why-confmon)
+- [Quick start](#quick-start)
+- [Config files](#config-files)
+  - [**Direct value files with .confval files**](#direct-value-files-with-confval-files)
+  - [**Loading environment variables**](#loading-environment-variables)
+  - [**Custom file loaders**](#custom-file-loaders)
+- [Building a config schema](#building-a-config-schema)
+  - [**Reserved Keys**](#reserved-keys)
+  - [**Other config value sources**](#other-config-value-sources)
+  - [**Lists**](#lists)
+  - [**Custom Schema Types**](#custom-schema-types)
+- [Querying values from a compiled configuration](#querying-values-from-a-compiled-configuration)
+  - [**Getting config values (Sync)**](#getting-config-values-sync)
+  - [**Getting config values (Async)**](#getting-config-values-async)
+  - [**Subscribing to/unsubscribing from change events**](#subscribing-tounsubscribing-from-change-events)
+
 ## Why ConfMon?
 ConfMon was designed with 2 main requirements in mind.
 
