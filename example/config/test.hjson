@@ -1,0 +1,7 @@
+{
+  # TLDR: HI Thar
+  apiEndpoint: https://mycom.com/api
+  jwt: {
+    secret2: Hi2
+  }
+}

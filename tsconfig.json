@@ -21,6 +21,8 @@
     "noUnusedParameters": true,
     "exactOptionalPropertyTypes": true,
     "noUncheckedIndexedAccess": true,
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+    "stripInternal": true,
+  },
+  "include": ["src/**/*"]
 }

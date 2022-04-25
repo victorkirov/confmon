@@ -1,23 +1,23 @@
 {
-  "name": "configmon",
-  "version": "0.0.1",
-  "license": "MIT",
-  "description": "A monitoring configuration manager",
+  "name": "confmon",
+  "version": "0.0.1-alpha.5",
+  "license": "GNU GPLv3",
+  "description": "Config loading and monitoring solution",
   "main": "lib/index.js",
   "scripts": {
     "build": "rimraf ./lib && tsc -p tsconfig.build.json",
-    "audit": "NODE_ENV=production check-audit",
+    "audit": "pnpm audit",
     "test": "jest --coverage --config ./jest.config.js",
     "lint": "eslint . --ext .ts"
   },
-  "homepage": "https://github.com/victorkirov/configmon#readme",
+  "homepage": "https://github.com/victorkirov/confmon#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/victorkirov/configmon.git"
+    "url": "git+https://github.com/victorkirov/confmon.git"
   },
   "author": "Victor Kirov",
   "bugs": {
-    "url": "https://github.com/victorkirov/configmon/issues"
+    "url": "https://github.com/victorkirov/confmon/issues"
   },
   "keywords": [
     "configuration",
@@ -29,22 +29,31 @@
     "node": ">= 12.0.0"
   },
   "devDependencies": {
+    "@types/cson": "^7.20.1",
+    "@types/hjson": "^2.4.3",
+    "@types/ini": "^1.3.31",
     "@types/jest": "^27.4.1",
-    "@types/node": "^17.0.23",
-    "@typescript-eslint/eslint-plugin": "^5.18.0",
-    "@typescript-eslint/parser": "^5.18.0",
-    "eslint": "^8.13.0",
+    "@types/node": "^17.0.26",
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "eslint": "^8.14.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "jest": "^27.5.1",
     "jest-extended": "^2.0.0",
-    "npm-audit-resolver": "^3.0.0-7",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.1.4",
     "typescript": "^4.6.3"
   },
   "dependencies": {
-    "statesis": "^0.2.2"
+    "cson": "^7.20.0",
+    "hjson": "^3.2.2",
+    "ini": "^3.0.0",
+    "json5": "^2.2.1",
+    "statesis": "^0.2.2",
+    "toml": "^3.0.0",
+    "x2js": "^3.4.3",
+    "yaml": "^2.0.1"
   }
 }
