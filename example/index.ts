@@ -1,4 +1,3 @@
-// NOTE: Node 17 is needed to run the below example for the fetch API
 import axios from 'axios'
 import cf from '../src'
 
@@ -36,6 +35,8 @@ myConfig.server.confListen(newServerValue => console.log('Server changed: ', new
 myConfig.catFacts.confListen(newCatFactsValue => console.log('Cat facts changed: ', newCatFactsValue.fact))
 
 /*
+TODO
+
 // How to get from API or custom func?
 const configSchema = {
   server: {
@@ -50,7 +51,7 @@ const configSchema = {
   jwt: {
     secret: cf.asString(),
   },
-  apiEndpoint: cf.asString((val) => val.startsWith('https://')),
+  apiEndpoint: cf.asURL(),
   database: {
     host: cf.asString(),
     port: cf.asPort(),
@@ -64,8 +65,13 @@ const configSchema = {
   },
   report: {
     title: cf.asString(),
-    emailTo: cf.asList(cf.asString((val) => isEmail(val))),
-  }
+    emailTo: cf.asList(cf.asEmail()),
+  },
+  featureFlags: cf.asList(cf.asString()),
+  credentials: cf.asList({
+    user: cf.asString(),
+    password: cf.asString(),
+  }),
 }
 
 const options = {

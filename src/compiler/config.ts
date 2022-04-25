@@ -34,6 +34,7 @@ abstract class BaseSubscribablePromiseHandler<T> {
     return getValuePromise
   }
 
+  // TODO: add options and allow firing on startup
   confListen(onChangeCallback: (newValue: T, oldValue: T) => void): () => void {
     this.__emitter.on('change', onChangeCallback)
 

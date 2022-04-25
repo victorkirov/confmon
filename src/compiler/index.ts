@@ -9,6 +9,7 @@ import { ConvertToSubscribableSchema, NonReserved, Schema } from './types'
 export const compile = <T extends Schema>(schema: NonReserved<T>): ConvertToSubscribableSchema<T> => {
   const compiledConfig = compileConfig(schema)
 
+  // TODO: extract to file-load-manager and ensure files processed alphabetically
   const configDirectory = process.env.CONFMON_PATH || './config'
 
   const getConfig = () => {
