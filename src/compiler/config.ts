@@ -81,6 +81,13 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   }
 
   getSync(): U {
+    if (
+      (this.value === undefined || this.value === null)
+    && this.typeOptions.defaultValue
+    ) {
+      return this.typeOptions.defaultValue
+    }
+
     return this.value
   }
 
@@ -118,7 +125,8 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   /** @internal */
   async __getValue(): Promise<U> {
     await this.retrievePromise
-    return this.value
+
+    return this.getSync()
   }
 
   /** @internal */

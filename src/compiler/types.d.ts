@@ -5,8 +5,6 @@ import {
 
 type ReservedKeys = 'then' | 'confListen' | 'confRemoveListener' | 'getSync'
 
-// TODO: make nodes where 'from' is specified be optional/undefined
-
 export type NonReserved<T> = T extends Primitive ? T : {
   [K in keyof T]: K extends ReservedKeys ? never : NonReserved<T[K]>
 }

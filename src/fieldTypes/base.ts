@@ -24,7 +24,7 @@ export abstract class BaseType<T> {
     }
   }
 
-  required<BT extends this & { default: never; nullable: false }>(): BT {
+  required<BT extends this & { from: never; default: never; nullable: false }>(): BT {
     this.ejectedGate()
 
     if (this.options.defaultValue) {
@@ -47,7 +47,7 @@ export abstract class BaseType<T> {
     return this as BT
   }
 
-  from<BT extends this & { fromKey: never }>(
+  from<BT extends this & { required: never; fromKey: never }>(
     fromFunc: () => Promise<T> | T, options?: FromFuncOptions,
   ): BT {
     this.ejectedGate()

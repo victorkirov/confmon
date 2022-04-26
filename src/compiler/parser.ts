@@ -9,6 +9,8 @@ import toml from 'toml'
 import X2js from 'x2js'
 import yaml from 'yaml'
 
+// TODO: implement custom parsers
+
 const parseCson = (stringData: string): Record<string, unknown> => (cson.parse(stringData))
 
 const parseHJson = (stringData: string): Record<string, unknown> => (hJson.parse(stringData))
