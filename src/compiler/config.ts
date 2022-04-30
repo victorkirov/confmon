@@ -1,7 +1,7 @@
 import { EventEmitter } from 'stream'
 import { BaseType, TypeOptions } from '../fieldTypes'
 
-import { ExtractSchemaAsPrimitives, Schema } from './types'
+import { ExtractSchemaAsPrimitives, ListenOptions, Schema } from './types'
 
 abstract class BaseSubscribablePromiseHandler<T> {
   /** @internal */
@@ -34,9 +34,15 @@ abstract class BaseSubscribablePromiseHandler<T> {
     return getValuePromise
   }
 
-  // TODO: add options and allow firing on startup
-  confListen(onChangeCallback: (newValue: T, oldValue: T) => void): () => void {
+  confListen(
+    onChangeCallback: (newValue: T, oldValue: T) => void,
+    options?: ListenOptions,
+  ): () => void {
     this.__emitter.on('change', onChangeCallback)
+
+    if (options?.callOnInit) {
+      onChangeCallback(this.getSync(), this.getSync())
+    }
 
     return () => {
       this.confRemoveListener(onChangeCallback)

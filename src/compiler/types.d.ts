@@ -45,9 +45,27 @@ export type ExtractSchemaAsPrimitives<T extends Schema> = Expand<{
 
 type UnsubscribeFunction = () => void
 
+export interface ListenOptions {
+  /**
+   * If true, the listener will be called immediately with the current value of the config.
+   */
+  callOnInit?: boolean
+}
+
 type Subscribable<T> = PromiseLike<T extends Primitive ? T : ExtractSchemaAsPrimitives<T>> & {
-  confListen: (callback: (value: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>) => void) => UnsubscribeFunction
-  confRemoveListener: (callback: (value: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>) => void) => void
+  confListen: (
+    callback: (
+      newValue: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>,
+      oldValue: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>
+    ) => void,
+    options?: ListenOptions
+  ) => UnsubscribeFunction
+  confRemoveListener: (
+    callback: (
+      newValue: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>,
+      oldValue: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>
+    ) => void
+  ) => void
   getSync: () => T extends Primitive ? T : ExtractSchemaAsPrimitives<T>
 }
 
