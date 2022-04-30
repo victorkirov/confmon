@@ -1,5 +1,5 @@
 {
-  "baseURL": "/",
+  "apiEndpoint": "http://my-url.com/",
   "database": {
     "client": "mysql",
     "host": "localhost",

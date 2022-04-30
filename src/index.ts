@@ -2,6 +2,7 @@ import  { compile }  from './compiler'
 
 import {
   BaseType,
+  EnumType,
   NumberType,
   ObjectType,
   PortType,
@@ -14,6 +15,7 @@ export {
 
 export default {
   compile,
+  asEnum: (values: string[]) => new EnumType(values),
   asString: () => new StringType(),
   asNumber: () => new NumberType(),
   asPort: () => new PortType(),
