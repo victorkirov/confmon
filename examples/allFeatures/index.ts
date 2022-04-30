@@ -1,22 +1,37 @@
+/**
+ * This example shows off all the features of ConfMon
+ */
+
 import axios from 'axios'
-import cf from '../src'
+import cf from '../../src'
 
 const configSchema = {
+  // ? server shows required and default values
   server: {
     host: cf.asString().required(),
     port: cf.asPort().default(3000),
   },
+
+  // ? This is an optional value which will be undefined by default
   temp: cf.asString(),
+
+  // ? This is set to be pulled from the environment variable "HOSTTYPE"
   hostType: cf.asString().required(),
+
+  // ? This is populated from a confval file
   fromVal: {
     innerVal: cf.asString().required(),
   },
+
+  // ? This is populated from a custom source, in this case, a remote API, and polled for every 2 seconds
   catFacts: cf.asObject().from(async () => {
     const resp = await axios.get('https://catfact.ninja/fact')
     return resp.data
   }, {
     pollInterval: 2000,
   }),
+
+  // ? 'then' is a reserved key in the ConfMon schema, so we assign it to a different key to that of the origin
   thenSurrogate: cf.asString().fromKey('then')
 }
 
@@ -37,19 +52,9 @@ myConfig.catFacts.confListen(newCatFactsValue => console.log('Cat facts changed:
 /*
 TODO
 
-// How to get from API or custom func?
 const configSchema = {
-  server: {
-    host: cf.asString().required(),
-    port: cf.asPort().default(3000),
-  },
-  baseURL: cf.asString(),
   logging: {
     level: cf.asEnum('INFO', 'DEBUG', 'WARN', 'ERROR').default('INFO'),
-  },
-  hostType: cf.asString(),
-  jwt: {
-    secret: cf.asString(),
   },
   apiEndpoint: cf.asURL(),
   database: {
@@ -75,7 +80,6 @@ const configSchema = {
 }
 
 const options = {
-  validate: true,
   throwOnError: true,
   strict, // ???? Only allow specified values and throw on any unrecognised ones
   onError: (err) => { console.log(err) },
@@ -88,14 +92,4 @@ config.on('error', (err) => { console.log(err) })
 // or
 config.onError((err) => { console.log(err) })
 
-const endSubscription = config.on.server.change((newValue) => {})
-const endSubscription2 = config.on.server.host.change((newValue) => {})
-
-const configValue = await config.get.server.host
-const endSubscription2 = config.on.server.host.change((newValue) => {})
-// or
-const configValue = await config.server.host.val()
-const endSubscription2 = config.server.host.onChange((newValue) => {})
-
-endSubscription()
 */
