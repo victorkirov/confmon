@@ -1,12 +1,15 @@
 import  { compile }  from './compiler'
+import  { Schema }  from './compiler/types'
 
 import {
   BaseType,
   EnumType,
+  ListType,
   NumberType,
   ObjectType,
   PortType,
   StringType,
+  StructType,
 } from './fieldTypes'
 
 export {
@@ -19,5 +22,7 @@ export default {
   asString: () => new StringType(),
   asNumber: () => new NumberType(),
   asPort: () => new PortType(),
-  asObject: () => new ObjectType(),
+  asUnstructuredObject: () => new ObjectType(),
+  asStruct: <T extends Schema>(schema: T) => new StructType(schema),
+  asList: <T>(itemType: BaseType<T>) => new ListType(itemType),
 }

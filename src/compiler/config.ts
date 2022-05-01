@@ -9,7 +9,7 @@ abstract class BaseSubscribablePromiseHandler<T> {
   /** @internal */
   abstract __getOverrideKey(): string | undefined
   /** @internal */
-  abstract __applyValue(value: unknown): void
+  abstract __applyValue(value: unknown): Promise<void>
   /** @internal */
   abstract __isRequired(): boolean
 
@@ -98,14 +98,14 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   }
 
   /** @internal */
-  __applyValue(newValue: unknown): void {
+  async __applyValue(newValue: unknown): Promise<void> {
     // Only the fromFunc call will set this value
     if (this.typeOptions.fromFunc) return
 
-    this.__applyValueInternal(newValue)
+    await this.__applyValueInternal(newValue)
   }
 
-  __applyValueInternal(newValue: unknown): void {
+  async __applyValueInternal(newValue: unknown): Promise<void> {
     if (this.value === newValue) return
 
     const oldValue = this.value
@@ -117,10 +117,10 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
       this.value = newValue as unknown as U
     } else {
-      this.value = this.typeController.validate(newValue)
+      this.value = await this.typeController.validate(newValue)
     }
 
-    this.__emitter.emit('change', newValue, oldValue)
+    this.__emitter.emit('change', this.value, oldValue)
   }
 
   /** @internal */
@@ -141,7 +141,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   }
 }
 
-class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<ExtractSchemaAsPrimitives<T>> {
+export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<ExtractSchemaAsPrimitives<T>> {
   __children: {
     [K in keyof T]: T[K] extends Schema ?
       ConfigBranchNode<T[K]>
@@ -202,14 +202,14 @@ class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<
   }
 
   /** @internal */
-  __applyValue(newValue: unknown): void {
+  async __applyValue(newValue: unknown): Promise<void> {
     if (newValue === this.__value) return
 
     if (this.__validateValueHasExpectedStructure(newValue)) {
       for (const key of Object.keys(this.__children) as (keyof T)[]) {
         const child = this.__children[key]
         const lookupKey = child.__getOverrideKey() ?? key  as keyof T
-        child.__applyValue(newValue[lookupKey])
+        await child.__applyValue(newValue[lookupKey])
       }
 
       const oldValue = this.__value
