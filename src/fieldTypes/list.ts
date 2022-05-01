@@ -1,6 +1,6 @@
 import { BaseType, TypeOptions } from './base'
 
-export class ListType<U, T extends BaseType<U>> extends BaseType<U[]> {
+export class ListType<T extends BaseType<unknown>> extends BaseType<(T extends BaseType<infer U> ? U : never)[]> {
   private itemType: T
 
   constructor(itemType: T) {
@@ -9,18 +9,18 @@ export class ListType<U, T extends BaseType<U>> extends BaseType<U[]> {
     this.itemType = itemType
   }
 
-  validate = async (value: unknown): Promise<U[]> => {
+  validate = async (value: unknown): Promise<(T extends BaseType<infer U> ? U : never)[]> => {
     if (!Array.isArray(value)) {
       throw new Error(`${this.constructor.name} must be an array`)
     }
 
     const result = await Promise.all(value.map(item => this.itemType.validate(item)))
 
-    return result
+    return result as (T extends BaseType<infer U> ? U : never)[]
   }
 
   /** @internal */
-  eject(): TypeOptions<U[]>  {
+  eject(): TypeOptions<(T extends BaseType<infer U> ? U : never)[]>  {
     this.itemType.eject()
 
     return super.eject()

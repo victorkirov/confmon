@@ -52,21 +52,26 @@ export interface ListenOptions {
   callOnInit?: boolean
 }
 
-type Subscribable<T> = PromiseLike<T extends Primitive ? T : ExtractSchemaAsPrimitives<T>> & {
+type ExpandSubscribableType<T> = T extends Primitive ? T
+  : T extends Array<infer U> ?
+    U[]
+    : ExtractSchemaAsPrimitives<T>
+
+type Subscribable<T> = PromiseLike<ExpandSubscribableType<T>> & {
   confListen: (
     callback: (
-      newValue: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>,
-      oldValue: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>
+      newValue: ExpandSubscribableType<T>,
+      oldValue: ExpandSubscribableType<T>
     ) => void,
     options?: ListenOptions
   ) => UnsubscribeFunction
   confRemoveListener: (
     callback: (
-      newValue: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>,
-      oldValue: T extends Primitive ? T : ExtractSchemaAsPrimitives<T>
+      newValue: ExpandSubscribableType<T>,
+      oldValue: ExpandSubscribableType<T>
     ) => void
   ) => void
-  getSync: () => T extends Primitive ? T : ExtractSchemaAsPrimitives<T>
+  getSync: () => ExpandSubscribableType<T>
 }
 
 export type ConvertToSubscribableSchema<T extends Schema> = Expand<{

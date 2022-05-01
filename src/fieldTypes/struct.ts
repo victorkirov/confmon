@@ -1,7 +1,7 @@
-import { BaseType, TypeOptions } from './base'
-
 import { ExtractSchemaAsPrimitives, Schema } from '../compiler/types'
 import { ConfigBranchNode, compileConfig } from '../compiler/config'
+
+import { BaseType, TypeOptions } from './base'
 
 export class StructType<T extends Schema> extends BaseType<ExtractSchemaAsPrimitives<T>> {
   private schema: T

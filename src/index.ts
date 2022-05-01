@@ -24,5 +24,5 @@ export default {
   asPort: () => new PortType(),
   asUnstructuredObject: () => new ObjectType(),
   asStruct: <T extends Schema>(schema: T) => new StructType(schema),
-  asList: <T>(itemType: BaseType<T>) => new ListType(itemType),
+  asList: <T extends BaseType<unknown>>(itemType: T) => new ListType(itemType),
 }
