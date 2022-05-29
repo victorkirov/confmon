@@ -104,11 +104,9 @@ myConfig.temp.then(tempValue => console.log('Temp:', tempValue))
 myConfig.apiEndpoint.then(apiValue => console.log('API Endpoint:', apiValue))
 myConfig.logging.then(logLevel => console.log('LogLevel:', logLevel))
 myConfig.hostType.then(tempValue => console.log('Host Type:', tempValue))
-myConfig.catFacts.then(tempValue => console.log('Cat facts:', tempValue))
 myConfig.fromVal.innerVal.then(tempValue => console.log('Custom Val File:' , tempValue))
 
 // ? setup listeners
-// TODO: these events are firing on start without the option being set to do so. Fix.
 const stopServerListener = myConfig.server.confListen(newServerValue => console.log('Server changed:', newServerValue))
 myConfig.catFacts.confListen(newCatFactsValue => console.log('Cat facts changed:', newCatFactsValue))
 myConfig.report.confListen(newStruct => console.log('Struct changed:', newStruct))
