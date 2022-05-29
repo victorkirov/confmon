@@ -13,10 +13,10 @@ export class StructType<T extends Schema> extends BaseType<ExtractSchemaAsPrimit
     this.schema = schema
   }
 
-  validate = async (value: unknown): Promise<ExtractSchemaAsPrimitives<T>> => {
-    await this.config.__applyValue(value)
+  validate = (value: unknown): ExtractSchemaAsPrimitives<T> => {
+    this.config.__applyValue(value)
 
-    const validatedValue = await this.config
+    const validatedValue = this.config.getSync()
 
     return validatedValue
   }

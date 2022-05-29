@@ -62,6 +62,14 @@ const configSchema = {
     creds: cf.asStruct({
       user: cf.asString(),
       password: cf.asString(),
+
+      // TODO: fromfunc in struct should fire outer
+      other: cf.asUnstructuredObject().from(async () => {
+        const resp = await axios.get('https://catfact.ninja/fact')
+        return resp.data
+      }, {
+        pollInterval: 4000,
+      })
     }),
     fields: cf.asList(cf.asString()),
     credentials: cf.asList(
@@ -70,12 +78,19 @@ const configSchema = {
         password: cf.asString(),
       })
     ),
+
+    // TODO: nested fromfuncs should fire parent
+    other: cf.asUnstructuredObject().from(async () => {
+      const resp = await axios.get('https://catfact.ninja/fact')
+      return resp.data
+    }, {
+      pollInterval: 4000,
+    })
   },
 }
 
 const myConfig = cf.compile(configSchema)
 
-// TODO: This doesn't load on start because validate is now a promise. Ensure that it loads before doing other promise based stuff like gets
 console.log('Struct:', myConfig.report.getSync())
 
 // ? Get values synchronously

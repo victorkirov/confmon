@@ -9,7 +9,7 @@ abstract class BaseSubscribablePromiseHandler<T> {
   /** @internal */
   abstract __getOverrideKey(): string | undefined
   /** @internal */
-  abstract __applyValue(value: unknown): Promise<void>
+  abstract __applyValue(value: unknown): void
   /** @internal */
   abstract __isRequired(): boolean
 
@@ -35,13 +35,13 @@ abstract class BaseSubscribablePromiseHandler<T> {
   }
 
   confListen(
-    onChangeCallback: (newValue: T, oldValue: T) => void,
+    onChangeCallback: (newValue: T) => void,
     options?: ListenOptions,
   ): () => void {
     this.__emitter.on('change', onChangeCallback)
 
     if (options?.callOnInit) {
-      onChangeCallback(this.getSync(), this.getSync())
+      onChangeCallback(this.getSync())
     }
 
     return () => {
@@ -49,7 +49,7 @@ abstract class BaseSubscribablePromiseHandler<T> {
     }
   }
 
-  confRemoveListener(onChangeCallback: (newValue: T, oldValue: T) => void): void {
+  confRemoveListener(onChangeCallback: (newValue: T) => void): void {
     this.__emitter.removeListener('change', onChangeCallback)
   }
 }
@@ -89,7 +89,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   getSync(): U {
     if (
       (this.value === undefined || this.value === null)
-    && this.typeOptions.defaultValue
+      && this.typeOptions.defaultValue
     ) {
       return this.typeOptions.defaultValue
     }
@@ -98,17 +98,15 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   }
 
   /** @internal */
-  async __applyValue(newValue: unknown): Promise<void> {
+  __applyValue(newValue: unknown): void {
     // Only the fromFunc call will set this value
     if (this.typeOptions.fromFunc) return
 
-    await this.__applyValueInternal(newValue)
+    this.__applyValueInternal(newValue)
   }
 
-  async __applyValueInternal(newValue: unknown): Promise<void> {
+  __applyValueInternal(newValue: unknown): void {
     if (this.value === newValue) return
-
-    const oldValue = this.value
 
     if (newValue === null || newValue === undefined) {
       if (this.typeOptions.isRequired) {
@@ -117,10 +115,10 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
       this.value = newValue as unknown as U
     } else {
-      this.value = await this.typeController.validate(newValue)
+      this.value = this.typeController.validate(newValue)
     }
 
-    this.__emitter.emit('change', this.value, oldValue)
+    this.__emitter.emit('change', this.value)
   }
 
   /** @internal */
@@ -202,20 +200,19 @@ export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseH
   }
 
   /** @internal */
-  async __applyValue(newValue: unknown): Promise<void> {
+  __applyValue(newValue: unknown): void {
     if (newValue === this.__value) return
 
     if (this.__validateValueHasExpectedStructure(newValue)) {
       for (const key of Object.keys(this.__children) as (keyof T)[]) {
         const child = this.__children[key]
         const lookupKey = child.__getOverrideKey() ?? key  as keyof T
-        await child.__applyValue(newValue[lookupKey])
+        child.__applyValue(newValue[lookupKey])
       }
 
-      const oldValue = this.__value
       this.__value = newValue as unknown as ExtractSchemaAsPrimitives<T>
 
-      this.__emitter.emit('change', newValue, oldValue)
+      this.__emitter.emit('change', newValue)
     }
   }
 

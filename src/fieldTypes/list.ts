@@ -9,12 +9,12 @@ export class ListType<T extends BaseType<unknown>> extends BaseType<(T extends B
     this.itemType = itemType
   }
 
-  validate = async (value: unknown): Promise<(T extends BaseType<infer U> ? U : never)[]> => {
+  validate = (value: unknown): (T extends BaseType<infer U> ? U : never)[] => {
     if (!Array.isArray(value)) {
       throw new Error(`${this.constructor.name} must be an array`)
     }
 
-    const result = await Promise.all(value.map(item => this.itemType.validate(item)))
+    const result = value.map(item => this.itemType.validate(item))
 
     return result as (T extends BaseType<infer U> ? U : never)[]
   }

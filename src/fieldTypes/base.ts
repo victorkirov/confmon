@@ -75,5 +75,5 @@ export abstract class BaseType<T> {
   }
 
   /** @internal */
-  abstract validate(_value: unknown): Promise<T> | T
+  abstract validate(_value: unknown): T
 }
