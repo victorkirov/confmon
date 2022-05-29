@@ -89,7 +89,7 @@ myConfig.temp.then(tempValue => console.log('Temp:', tempValue))
 myConfig.apiEndpoint.then(apiValue => console.log('API Endpoint:', apiValue))
 myConfig.logging.then(logLevel => console.log('LogLevel:', logLevel))
 myConfig.hostType.then(tempValue => console.log('Host Type:', tempValue))
-myConfig.catFacts.then(tempValue => console.log('Cat facts:', tempValue)) // TODO: get rid of object type and use struct instead
+myConfig.catFacts.then(tempValue => console.log('Cat facts:', tempValue))
 myConfig.fromVal.innerVal.then(tempValue => console.log('Custom Val File:' , tempValue))
 
 // ? setup listeners
