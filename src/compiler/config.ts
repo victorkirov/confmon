@@ -63,10 +63,12 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
   private value!: U
 
+  private parent: ConfigBranchNode<any> | undefined
 
-  constructor(typeController:  T) {
+  constructor(typeController:  T, parent?: ConfigBranchNode<any>) {
     super()
 
+    this.parent = parent
     this.typeController = typeController
     this.typeOptions = typeController.eject()
 
@@ -119,6 +121,8 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
     }
 
     this.__emitter.emit('change', this.value)
+
+    if (this.parent) this.parent.__notifyChange()
   }
 
   /** @internal */
@@ -150,17 +154,20 @@ export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseH
 
   private __value!: ExtractSchemaAsPrimitives<T>
 
-  constructor(schema: T) {
+  private parent: ConfigBranchNode<any> | undefined
+
+  constructor(schema: T, parent?: ConfigBranchNode<any>) {
     super()
 
+    this.parent = parent
     this.__children = {} as any
 
     for (const key of Object.keys(schema) as (keyof T)[]) {
       const child = schema[key] as T[typeof key]
       if (child instanceof BaseType) {
-        this.__children[key] = new ConfigLeafNode(child as any) as any
+        this.__children[key] = new ConfigLeafNode(child as any, this) as any
       } else {
-        this.__children[key] = new ConfigBranchNode(child) as any
+        this.__children[key] = new ConfigBranchNode(child, this) as any
       }
       Object.defineProperty(
         this,
@@ -204,16 +211,34 @@ export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseH
     if (newValue === this.__value) return
 
     if (this.__validateValueHasExpectedStructure(newValue)) {
+      const notifyValue: Partial<Record<keyof T, unknown>> = {}
+
       for (const key of Object.keys(this.__children) as (keyof T)[]) {
         const child = this.__children[key]
         const lookupKey = child.__getOverrideKey() ?? key  as keyof T
         child.__applyValue(newValue[lookupKey])
+
+        notifyValue[key] = child.getSync()
       }
 
       this.__value = newValue as unknown as ExtractSchemaAsPrimitives<T>
 
-      this.__emitter.emit('change', newValue)
+      this.__emitter.emit('change', notifyValue)
     }
+  }
+
+  /** @internal */
+  __notifyChange(): void {
+    const notifyValue: Partial<Record<keyof T, unknown>> = {}
+
+    for (const key of Object.keys(this.__children) as (keyof T)[]) {
+      const child = this.__children[key]
+      notifyValue[key] = child.getSync()
+    }
+
+    this.__emitter.emit('change', notifyValue)
+
+    if (this.parent) this.parent.__notifyChange()
   }
 
   /** @internal */

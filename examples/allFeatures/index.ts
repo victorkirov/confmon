@@ -78,14 +78,6 @@ const configSchema = {
         password: cf.asString(),
       })
     ),
-
-    // TODO: nested fromfuncs should fire parent
-    other: cf.asUnstructuredObject().from(async () => {
-      const resp = await axios.get('https://catfact.ninja/fact')
-      return resp.data
-    }, {
-      pollInterval: 4000,
-    })
   },
 }
 
