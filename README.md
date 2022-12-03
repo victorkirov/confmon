@@ -203,7 +203,7 @@ const mySchema = {
 ```
 
 ### **Other config value sources**
-ConfMon allows you to load parts of your schema from completely custom sources by allowing you to specify a function which will feed the value of the configuration field. This is dones by using the `.from(<func>, <options>)` schema class method.
+ConfMon allows you to load parts of your schema from completely custom sources by allowing you to specify a function which will feed the value of the configuration field. This is done by using the `.from(<func>, <options>)` schema class method.
 
 Note:
 These are just examples and possibly not the best way to implement global log levels, for example. An alternative approach could be to have a global Kubernetes ConfigMap which is mounted into the config folder for all of your deployments. You could have no log level specified by default allowing service to specify their own defaults, but if you had to debug an issue throughout all your services, you could update that config-map with 'INFO' or 'DEBUG' for the log level. There are many ways to skin a fish, the below is just one of them.
@@ -230,7 +230,30 @@ const mySchema = {
 ```
 
 ### **Lists**
-TODO
+Config values containing lists are supported. The type of item in the list is defined as a separate schema and can include a completely structured object definition, as shown in the examples below.
+
+If multiple sources define the values of the list, the source which is loaded last will fully define the contents of the list (i.e. lists are not merged form multiple sources).
+
+Example:
+```javascript
+import cf from 'confmon'
+import axios from 'axios'
+
+const mySchema = {
+  // A list of strings
+  emailAddresses: cf.asList(cf.asString()),
+
+  // a list of any object type
+  emailBodyTemplates: cf.asList(cf.asUnstructuredObject())
+
+  // a list of objects of a particular structure
+  emailTemplateFields: cf.asList(cf.asStruct({
+    name: cf.asString(),
+    value: cf.asString(),
+    order: cf.asNumber(),
+  }))
+}
+```
 
 ### **Custom Schema Types**
 While many schema types exist, you may want to create your own custom ones with their own value validation.
