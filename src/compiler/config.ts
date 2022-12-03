@@ -86,6 +86,13 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
         }, this.typeOptions.fromFuncOptions.pollInterval)
       }
     }
+
+    this.typeController.subscribe(newValue => {
+      if (this.value === newValue) return
+
+      this.value = newValue
+      this.__emitter.emit('change', this.value)
+    })
   }
 
   getSync(): U {
@@ -199,7 +206,7 @@ export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseH
 
     for (const key of keys) {
       if (!(key in value) && this.__children[key].__isRequired()) {
-        throw new Error(`Key ${key} missing in config object ${JSON.stringify(value)}`)
+        throw new Error(`Key ${String(key)} missing in config object ${JSON.stringify(value)}`)
       }
     }
 

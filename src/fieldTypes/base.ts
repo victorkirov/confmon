@@ -32,7 +32,7 @@ export abstract class BaseType<T> {
     }
 
     this.options.isRequired = true
-    return this as BT
+    return this as unknown as BT
   }
 
   default<BT extends this & { required: never; nullable: false }>(value: T): BT {
@@ -44,7 +44,7 @@ export abstract class BaseType<T> {
 
     this.options.defaultValue = value
 
-    return this as BT
+    return this as unknown as BT
   }
 
   from<BT extends this & { required: never; fromKey: never }>(
@@ -55,7 +55,7 @@ export abstract class BaseType<T> {
     this.options.fromFunc = fromFunc
     this.options.fromFuncOptions = options
 
-    return this as BT
+    return this as unknown as BT
   }
 
   fromKey<BT extends this & { from: never }>(
@@ -65,13 +65,21 @@ export abstract class BaseType<T> {
 
     this.options.fromKey = key
 
-    return this as BT
+    return this as unknown as BT
   }
 
   /** @internal */
-  eject(): TypeOptions<T>  {
+  eject(): TypeOptions<T> {
     this.isEjected = true
     return { ...this.options }
+  }
+
+  /** @internal */
+  subscribe(_onChangeCallback: (newValue: T) => void): void {
+  }
+
+  /** @internal */
+  unsubscribe(_onChangeCallback: (newValue: T) => void): void {
   }
 
   /** @internal */

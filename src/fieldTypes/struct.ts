@@ -27,4 +27,14 @@ export class StructType<T extends Schema> extends BaseType<ExtractSchemaAsPrimit
 
     return super.eject()
   }
+
+  /** @internal */
+  subscribe(onChangeCallback: (newValue: ExtractSchemaAsPrimitives<T>) => void): void {
+    this.config.confListen(onChangeCallback)
+  }
+
+  /** @internal */
+  unsubscribe(onChangeCallback: (newValue: ExtractSchemaAsPrimitives<T>) => void): void {
+    this.config.confRemoveListener(onChangeCallback)
+  }
 }

@@ -1,4 +1,4 @@
-lockfileVersion: 5.3
+lockfileVersion: 5.4
 
 specifiers:
   '@types/node': ^17.0.30
@@ -12,7 +12,7 @@ dependencies:
 
 devDependencies:
   '@types/node': 17.0.30
-  ts-node: 10.7.0_706dd5b3c16966aa1e66930b7cc80c2b
+  ts-node: 10.7.0_obw5lm6bnftkuhtgsmfxzsamfm
 
 packages:
 
@@ -132,7 +132,7 @@ packages:
       mime-db: 1.52.0
     dev: false
 
-  /ts-node/10.7.0_706dd5b3c16966aa1e66930b7cc80c2b:
+  /ts-node/10.7.0_obw5lm6bnftkuhtgsmfxzsamfm:
     resolution: {integrity: sha512-TbIGS4xgJoX2i3do417KSaep1uRAW/Lu+WAL2doDHC0D6ummjirVOXU5/7aiZotbQ5p1Zp9tP7U6cYhA0O7M8A==}
     hasBin: true
     peerDependencies:
@@ -167,7 +167,6 @@ packages:
     resolution: {integrity: sha512-9ia/jWHIEbo49HfjrLGfKbZSuWo9iTMwXO+Ca3pRsSpbsMbc7/IU8NKdCZVRRBafVPGnoJeFL76ZOAA84I9fEg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-    dev: false
 
   /v8-compile-cache-lib/3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
