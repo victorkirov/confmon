@@ -47,12 +47,12 @@ const configSchema = {
   },
 
   // ? This is populated from a custom source, in this case, a remote API, and polled for every 4 seconds
-  // catFacts: cf.asUnstructuredObject().from(async () => {
-  //   const resp = await axios.get('https://catfact.ninja/fact')
-  //   return resp.data
-  // }, {
-  //   pollInterval: 4000,
-  // }),
+  catFacts: cf.asUnstructuredObject().from(async () => {
+    const resp = await axios.get('https://catfact.ninja/fact')
+    return resp.data
+  }, {
+    pollInterval: 4000,
+  }),
 
   // ? 'then' is a reserved key in the ConfMon schema, so we assign it to a different key to that of the origin
   thenSurrogate: cf.asString().fromKey('then'),
@@ -62,14 +62,6 @@ const configSchema = {
     creds: cf.asStruct({
       user: cf.asString(),
       password: cf.asString(),
-
-      // TODO: fromfunc in struct should fire outer
-      other: cf.asUnstructuredObject().from(async () => {
-        const resp = await axios.get('https://catfact.ninja/fact')
-        return resp.data
-      }, {
-        pollInterval: 4000,
-      })
     }),
     fields: cf.asList(cf.asString()),
     credentials: cf.asList(
@@ -100,8 +92,8 @@ myConfig.fromVal.innerVal.then(tempValue => console.log('Custom Val File:' , tem
 
 // ? setup listeners
 const stopServerListener = myConfig.server.confListen(newServerValue => console.log('Server changed:', newServerValue))
-// myConfig.catFacts.confListen(newCatFactsValue => console.log('Cat facts changed:', newCatFactsValue))
-myConfig.report.creds.confListen(newStruct => console.log('Struct changed:', newStruct))
+myConfig.catFacts.confListen(newCatFactsValue => console.log('Cat facts changed:', newCatFactsValue))
+myConfig.report.confListen(newStruct => console.log('Struct changed:', newStruct))
 
 const onLogChangeCallback = (newLogLevel: string, oldLogLevel: string) => console.log('Log level changed from <', oldLogLevel, '> to <', newLogLevel, '>')
 myConfig.logging.level.confListen(onLogChangeCallback)

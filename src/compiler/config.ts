@@ -12,6 +12,8 @@ abstract class BaseSubscribablePromiseHandler<T> {
   abstract __applyValue(value: unknown): void
   /** @internal */
   abstract __isRequired(): boolean
+  /** @internal */
+  abstract __notifyChange(): void
 
   abstract getSync(): T
 
@@ -92,6 +94,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
       this.value = newValue
       this.__emitter.emit('change', this.value)
+      this.parent?.__notifyChange()
     })
   }
 
@@ -114,6 +117,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
     this.__applyValueInternal(newValue)
   }
 
+  /** @internal */
   __applyValueInternal(newValue: unknown): void {
     if (this.value === newValue) return
 
@@ -147,6 +151,11 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   /** @internal */
   __isRequired(): boolean {
     return this.typeOptions.isRequired
+  }
+
+  /** @internal */
+  __notifyChange(): void {
+    this.__emitter.emit('change', this.value)
   }
 }
 
