@@ -8,9 +8,8 @@ Please note, this library is still in alpha phase, so the interface and usage ca
 
 ## TODOS to get to beta
 - Do the TODO comments
-- Improve typing and remove as many castings to `any` as possible
 - Tests, tests, tests
-- Figure out when errors are thrown and how they should be handled
+- Figure out when errors are thrown and how they should be handled... e.g. remove a required field from config files and error is thrown
 
 ## Contents
 - [Why ConfMon?](#why-confmon)

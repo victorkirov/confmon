@@ -6,11 +6,18 @@ import { parseFile } from './parser'
 import { compileConfig } from './config'
 import { ConvertToSubscribableSchema, NonReserved, Schema } from './types'
 
-export const compile = <T extends Schema>(schema: NonReserved<T>): ConvertToSubscribableSchema<T> => {
+type ConfMonOptions = {
+  configDirectory?: string
+}
+
+export const compile = <T extends Schema>(
+  schema: NonReserved<T>,
+  options?: ConfMonOptions,
+): ConvertToSubscribableSchema<T> => {
   const compiledConfig = compileConfig(schema)
 
   // TODO: extract to file-load-manager and ensure files processed alphabetically
-  const configDirectory = process.env.CONFMON_PATH || './config'
+  const configDirectory = options?.configDirectory ?? './config'
 
   const getConfig = () => {
     const configFiles = fs.readdirSync(configDirectory)
