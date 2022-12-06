@@ -18,6 +18,7 @@ Please note, this library is still in alpha phase, so the interface and usage ca
   - [**Direct value files with .confval files**](#direct-value-files-with-confval-files)
   - [**Loading environment variables**](#loading-environment-variables)
   - [**Custom file loaders**](#custom-file-loaders)
+  - [**Compile options**](#compile-options)
 - [Building a config schema](#building-a-config-schema)
   - [**Reserved Keys**](#reserved-keys)
   - [**Other config value sources**](#other-config-value-sources)
@@ -86,9 +87,9 @@ myConfig.server.confListen(newServerValue => console.log('Server changed: ', new
 ```
 
 ## Config files
-Configuration files should exist in a single directory. They can be in any of the following formats: `json`, `json5`, `hjson`, `cson`, `toml`, `yaml`, `xml`, and `ini`. A custom extension, `confval`, was also implemented and is described [below](#direct-value-files-with-confval-files). You are also able to add your own, custom file loaders to handle other file formats, as describe [below](#custom-file-loaders).
+Configuration files should exist in a single directory. They can be in the `json` format by default or you can specify custom file loaders and use other formats (see [**Custom file loaders**](#custom-file-loaders)). A custom extension, `confval`, was also implemented and is described [below](#direct-value-files-with-confval-files). You are also able to add your own, custom file loaders to handle other file formats, as describe [below](#custom-file-loaders).
 
-By default, the configuration directory is located at `<working_directory>/config`. This can be set to a relative path from the working directory, or to an absolute path by setting the `CONFMON_PATH` environment variable.
+By default, the configuration directory is located at `<working_directory>/config`. This can be set to a relative path from the working directory, or to an absolute path by setting the `configDirectory` in the options argument given to the compiler.
 
 Files in the config directory are loaded alphabetically with a lexicographical ordering and merged in that order. This means that a value defined in a file will be overwritten if it exists in a file with a later lexicographical filename.
 
@@ -139,6 +140,9 @@ database:
 ```
 
 ### **Custom file loaders**
+TODO
+
+### **Compile options**
 TODO
 
 ## Building a config schema

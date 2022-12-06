@@ -6,8 +6,11 @@ import { parseFile } from './parser'
 import { compileConfig } from './config'
 import { ConvertToSubscribableSchema, NonReserved, Schema } from './types'
 
-type ConfMonOptions = {
+export type ConfMonOptions = {
   configDirectory?: string
+  fileLoaders?: {
+    [fileExtension: string]: (data: string, fileName?: string) => Record<string, unknown>
+  }
 }
 
 export const compile = <T extends Schema>(
@@ -23,7 +26,7 @@ export const compile = <T extends Schema>(
     const configFiles = fs.readdirSync(configDirectory)
     return configFiles.reduce((acc, file) => {
       const filePath = `${configDirectory}/${file}`
-      const parsedConfig = parseFile(filePath)
+      const parsedConfig = parseFile(filePath, { ...options?.fileLoaders })
 
       return merge(acc, parsedConfig)
     }, {})

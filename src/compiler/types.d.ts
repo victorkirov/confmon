@@ -26,21 +26,21 @@ type OptionalKeys<T> = {
 }[keyof T]
 
 export type ExtractSchemaAsPrimitives<T extends Schema> = Expand<{
-  [K in RequiredKeys<T>]-?: K extends keyof T ?
+  [K in keyof T]-?: K extends RequiredKeys<T> ? (
     T[K] extends BaseType<infer U> ?
       U
       : T[K] extends Schema ?
         ExtractSchemaAsPrimitives<T[K]>
         : never
-    : never
-} & {
-  [K in OptionalKeys<T>]?: K extends keyof T ?
-    T[K] extends BaseType<infer U> ?
-      U | null | undefined
-      : T[K] extends Schema ?
-        ExtractSchemaAsPrimitives<T[K]>
-        : never
-    : never
+  ) : (
+    K extends OptionalKeys<T> ?
+      T[K] extends BaseType<infer U> ?
+        U | null | undefined
+        : T[K] extends Schema ?
+          ExtractSchemaAsPrimitives<T[K]>
+          : never
+      : never
+  )
 }>
 
 type UnsubscribeFunction = () => void
@@ -55,7 +55,9 @@ export interface ListenOptions {
 type ExpandSubscribableType<T> = T extends Primitive ? T
   : T extends Array<infer U> ?
     U[]
-    : ExtractSchemaAsPrimitives<T>
+    : T extends Schema ?
+      ExtractSchemaAsPrimitives<T>
+      : never
 
 type Subscribable<T> = PromiseLike<ExpandSubscribableType<T>> & {
   confListen: (
@@ -75,19 +77,19 @@ type Subscribable<T> = PromiseLike<ExpandSubscribableType<T>> & {
 }
 
 export type ConvertToSubscribableSchema<T extends Schema> = Expand<{
-  [K in RequiredKeys<T>]-?: K extends keyof T ?
+  [K in keyof T ]-?: K extends RequiredKeys<T> ? (
     T[K] extends BaseType<infer U> ?
       Subscribable<U>
       : T[K] extends Schema ?
         ConvertToSubscribableSchema<T[K]> & Subscribable<T[K]>
         : never
-    : never
-} & {
-  [K in OptionalKeys<T>]-?: K extends keyof T ?
-    T[K] extends BaseType<infer U> ?
-      Subscribable<U>
-      : T[K] extends Schema ?
-        ConvertToSubscribableSchema<T[K]> & Subscribable<T[K]>
-        : never
-    : never
+  ) : (
+    K extends OptionalKeys<T> ?
+      T[K] extends BaseType<infer U> ?
+        Subscribable<U | null | undefined>
+        : T[K] extends Schema ?
+          ConvertToSubscribableSchema<T[K]> & Subscribable<T[K]>
+          : never
+      : never
+  )
 }>
