@@ -1,7 +1,7 @@
 {
   "name": "confmon",
-  "version": "0.0.1-alpha.9",
-  "license": "GNU GPLv3",
+  "version": "0.0.1-alpha.10",
+  "license": "MIT",
   "description": "Config loading and monitoring solution",
   "main": "lib/index.js",
   "scripts": {
