@@ -1,4 +1,4 @@
-# ConfMon &middot; [![GitHub license](https://img.shields.io/badge/license-GNU-blue.svg)](https://github.com/victorkirov/confmon/blob/main/LICENSE) [![npm version](https://img.shields.io/npm/v/confmon.svg?style=flat)](https://www.npmjs.com/package/confmon)
+# ConfMon &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/victorkirov/confmon/blob/main/LICENSE) [![npm version](https://img.shields.io/npm/v/confmon.svg?style=flat)](https://www.npmjs.com/package/confmon)
 
 ConfMon loads configuration from a variety of files and custom sources and combines them into one global object. It then monitors those files for changes and allows the user to subscribe to change events on any node in the configuration, so that the software can react to configuration changes without a restart.
 
