@@ -1,6 +1,10 @@
 import fs from 'fs'
 import path from 'path'
 
+export type FileLoaders = {
+  [fileExtension: string]: (data: string, fileName?: string) => Record<string, unknown>
+}
+
 const parseJson = (stringData: string): Record<string, unknown> => (JSON.parse(stringData))
 
 const parseVal = (stringData: string, filename: string): Record<string, unknown> => {
@@ -66,9 +70,7 @@ const processEnv = <T extends Record<string, unknown>>(config: T): T => {
 
 export const parseFile = (
   filePath: string,
-  fileLoaders: {
-    [fileExtension: string]: (data: string, fileName?: string) => Record<string, unknown>,
-  }
+  fileLoaders: FileLoaders,
 ): Record<string, unknown> => {
   const filename = path.basename(filePath, path.extname(filePath))
   const extension = path.extname(filePath).substring(1)
