@@ -26,6 +26,9 @@ export const compile = <T extends Schema>(
 
   fs.watch(configDirectory, (_eventType, _filename) => {
     const newConfig = reReference(current, getConfig(configDirectory, fileLoaders))
+
+    if (newConfig === current) return
+
     current = newConfig
 
     compiledConfig.__applyValue(current)

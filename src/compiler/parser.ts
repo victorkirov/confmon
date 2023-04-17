@@ -68,18 +68,48 @@ const processEnv = <T extends Record<string, unknown>>(config: T): T => {
   return envConfig
 }
 
+/**
+ * Ensures that the file loaders are case-insensitive and that the default loaders are always present
+ */
+const fileLoaderCache = new WeakMap<FileLoaders, FileLoaders>()
+const compileFileLoaders =  (fileLoaders: FileLoaders): FileLoaders => {
+  if (fileLoaderCache.has(fileLoaders)) {
+    return fileLoaderCache.get(fileLoaders) as FileLoaders
+  }
+
+  const lowerCaseFileLoaders: FileLoaders = { }
+
+  for (const [extension, parser] of Object.entries(fileLoaders)) {
+    const extensionLower = extension.toLowerCase()
+
+    if (extensionLower in lowerCaseFileLoaders) {
+      throw new Error(`Duplicate file loader specified for extension ${extensionLower}`)
+    }
+
+    lowerCaseFileLoaders[extensionLower] = parser
+  }
+
+  const compiledFileLoaders = { ...extensionToParserMapping, ...lowerCaseFileLoaders } as FileLoaders
+
+  fileLoaderCache.set(fileLoaders, compiledFileLoaders)
+
+  return compiledFileLoaders
+}
+
 export const parseFile = (
   filePath: string,
   fileLoaders: FileLoaders,
 ): Record<string, unknown> => {
   const filename = path.basename(filePath, path.extname(filePath))
-  const extension = path.extname(filePath).substring(1)
+  const extension = path.extname(filePath).substring(1).toLowerCase()
 
   if (!extension) {
     throw new Error(`Could not determine extension of file ${filePath}`)
   }
 
-  const parser = fileLoaders[extension] ?? extensionToParserMapping[extension]
+  const combinedFileLoaders = compileFileLoaders(fileLoaders)
+
+  const parser = combinedFileLoaders[extension]
 
   if (!parser) {
     throw new Error(`No parser for extension ${extension}`)

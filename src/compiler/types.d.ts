@@ -63,6 +63,7 @@ type Subscribable<T> = PromiseLike<ExpandSubscribableType<T>> & {
   confListen: (
     callback: (
       newValue: ExpandSubscribableType<T>,
+      // TODO: Make oldValue work
       oldValue: ExpandSubscribableType<T>
     ) => void,
     options?: ListenOptions

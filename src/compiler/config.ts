@@ -78,7 +78,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
       // TODO: Improve this and add error handling
       const callFromFunc = () => new Promise(resolve =>{
         resolve(this.typeOptions.fromFunc?.())
-      }).then(value => this.__applyValueInternal(value))
+      }).then(value => this.__applyValueInternal(value, true))
 
       this.retrievePromise = callFromFunc()
 
@@ -93,6 +93,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
       if (this.value === newValue) return
 
       this.value = newValue
+
       this.__emitter.emit('change', this.value)
       this.parent?.__notifyChange()
     })
@@ -118,7 +119,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   }
 
   /** @internal */
-  __applyValueInternal(newValue: unknown): void {
+  __applyValueInternal(newValue: unknown, fromFunc = false): void {
     if (this.value === newValue) return
 
     if (newValue === null || newValue === undefined) {
@@ -133,7 +134,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
     this.__emitter.emit('change', this.value)
 
-    if (this.parent) this.parent.__notifyChange()
+    if (fromFunc && this.parent) this.parent.__notifyChange()
   }
 
   /** @internal */
