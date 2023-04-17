@@ -58,7 +58,6 @@ let server: http.Server
 */
 myConfig.webServer.confListen(
   ({ host, port }) => {
-    console.log('bob', { host, port })
     if (server) server.close()
 
     server = app.listen(port, host, () => {
