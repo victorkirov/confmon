@@ -3,7 +3,7 @@ module.exports = {
   transform: { '^.+\\.ts?$': 'ts-jest' },
   collectCoverageFrom: ['src/**/*.ts'],
   testRegex: '/src/.*\\.(test|Test)?\\.(ts)$',
-  moduleFileExtensions: ['ts'],
+  moduleFileExtensions: ['js', 'ts'],
   coverageReporters: ['json', 'html'],
   setupFilesAfterEnv: ['jest-extended'],
 }

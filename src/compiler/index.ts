@@ -1,10 +1,9 @@
 import fs from 'fs'
 import { reReference } from 'statesis'
 
-import { FileLoaders } from './parser'
-import { getConfig } from './configFileLoader'
-
 import { compileConfig } from './config'
+import { getConfig } from './configFileLoader'
+import { FileLoaders } from './parser'
 import { ConvertToSubscribableSchema, NonReserved, Schema } from './types'
 
 export type ConfMonOptions = {

@@ -1,5 +1,5 @@
-import { ExtractSchemaAsPrimitives, Schema } from '../compiler/types'
 import { ConfigBranchNode, compileConfig } from '../compiler/config'
+import { ExtractSchemaAsPrimitives, Schema } from '../compiler/types'
 
 import { BaseType, TypeOptions } from './base'
 
@@ -14,7 +14,12 @@ export class StructType<T extends Schema> extends BaseType<ExtractSchemaAsPrimit
   }
 
   validate = (value: unknown): ExtractSchemaAsPrimitives<T> => {
-    this.config.__applyValue(value)
+    try {
+      this.config.__applyValue(value)
+    } catch (error) {
+      const err = error as Error
+      throw new Error(`StructType must be a valid object. Reason: ${err.message}`)
+    }
 
     const validatedValue = this.config.getSync()
 

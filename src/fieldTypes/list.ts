@@ -14,9 +14,14 @@ export class ListType<T extends BaseType<unknown>> extends BaseType<(T extends B
       throw new Error(`${this.constructor.name} must be an array`)
     }
 
-    const result = value.map(item => this.itemType.validate(item))
+    try {
+      const result = value.map(item => this.itemType.validate(item))
 
-    return result as (T extends BaseType<infer U> ? U : never)[]
+      return result as (T extends BaseType<infer U> ? U : never)[]
+    } catch (error) {
+      const err = error as Error
+      throw new Error(`${this.constructor.name} must be a valid array. Reason: ${err.message}`)
+    }
   }
 
   /** @internal */
