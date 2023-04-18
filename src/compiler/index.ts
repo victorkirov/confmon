@@ -1,32 +1,34 @@
 import fs from 'fs'
-import { merge, reReference } from 'statesis'
+import { reReference } from 'statesis'
 
-import { parseFile } from './parser'
+import { FileLoaders } from './parser'
+import { getConfig } from './configFileLoader'
 
 import { compileConfig } from './config'
 import { ConvertToSubscribableSchema, NonReserved, Schema } from './types'
 
-export const compile = <T extends Schema>(schema: NonReserved<T>): ConvertToSubscribableSchema<T> => {
+export type ConfMonOptions = {
+  configDirectory?: string
+  fileLoaders?: FileLoaders
+}
+
+export const compile = <T extends Schema>(
+  schema: NonReserved<T>,
+  options?: ConfMonOptions,
+): ConvertToSubscribableSchema<T> => {
   const compiledConfig = compileConfig(schema)
 
-  // TODO: extract to file-load-manager and ensure files processed alphabetically
-  const configDirectory = process.env.CONFMON_PATH || './config'
+  const configDirectory = options?.configDirectory ?? './config'
+  const fileLoaders = { ...options?.fileLoaders }
 
-  const getConfig = () => {
-    const configFiles = fs.readdirSync(configDirectory)
-    return configFiles.reduce((acc, file) => {
-      const filePath = `${configDirectory}/${file}`
-      const parsedConfig = parseFile(filePath)
-
-      return merge(acc, parsedConfig)
-    }, {})
-  }
-
-  let current = getConfig()
+  let current = getConfig(configDirectory, fileLoaders)
   compiledConfig.__applyValue(current)
 
   fs.watch(configDirectory, (_eventType, _filename) => {
-    const newConfig = reReference(current, getConfig())
+    const newConfig = reReference(current, getConfig(configDirectory, fileLoaders))
+
+    if (newConfig === current) return
+
     current = newConfig
 
     compiledConfig.__applyValue(current)

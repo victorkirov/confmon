@@ -1,36 +1,11 @@
 import fs from 'fs'
 import path from 'path'
 
-import cson from 'cson'
-import hJson from 'hjson'
-import ini from 'ini'
-import json5 from 'json5'
-import toml from 'toml'
-import X2js from 'x2js'
-import yaml from 'yaml'
-
-// TODO: implement custom parsers
-
-const parseCson = (stringData: string): Record<string, unknown> => (cson.parse(stringData))
-
-const parseHJson = (stringData: string): Record<string, unknown> => (hJson.parse(stringData))
-
-const parseIni = (stringData: string): Record<string, unknown> => (
-  ini.parse(stringData)
-)
-
-const parseJson = (stringData: string): Record<string, unknown> => (JSON.parse(stringData))
-
-const parseJson5 = (stringData: string): Record<string, unknown> => (json5.parse(stringData))
-
-const parseToml = (stringData: string): Record<string, unknown> => (toml.parse(stringData))
-
-const parseXml = (stringData: string): Record<string, unknown> => {
-  const parser = new X2js()
-  return parser.xml2js(stringData)
+export type FileLoaders = {
+  [fileExtension: string]: (data: string, fileName?: string) => Record<string, unknown>
 }
 
-const parseYaml = (stringData: string): Record<string, unknown> => (yaml.parse(stringData))
+const parseJson = (stringData: string): Record<string, unknown> => (JSON.parse(stringData))
 
 const parseVal = (stringData: string, filename: string): Record<string, unknown> => {
   const breadcrumbs = filename.split('|')
@@ -56,14 +31,7 @@ const parseVal = (stringData: string, filename: string): Record<string, unknown>
 }
 
 const extensionToParserMapping: Record<string, (stringData: string, filename: string) => Record<string, unknown>> = {
-  cson: parseCson,
-  hjson: parseHJson,
-  ini: parseIni,
   json: parseJson,
-  json5: parseJson5,
-  toml: parseToml,
-  xml: parseXml,
-  yaml: parseYaml,
   confval: parseVal,
 }
 
@@ -100,15 +68,48 @@ const processEnv = <T extends Record<string, unknown>>(config: T): T => {
   return envConfig
 }
 
-export const parseFile = (filePath: string): Record<string, unknown> => {
+/**
+ * Ensures that the file loaders are case-insensitive and that the default loaders are always present
+ */
+const fileLoaderCache = new WeakMap<FileLoaders, FileLoaders>()
+const compileFileLoaders =  (fileLoaders: FileLoaders): FileLoaders => {
+  if (fileLoaderCache.has(fileLoaders)) {
+    return fileLoaderCache.get(fileLoaders) as FileLoaders
+  }
+
+  const lowerCaseFileLoaders: FileLoaders = { }
+
+  for (const [extension, parser] of Object.entries(fileLoaders)) {
+    const extensionLower = extension.toLowerCase()
+
+    if (extensionLower in lowerCaseFileLoaders) {
+      throw new Error(`Duplicate file loader specified for extension ${extensionLower}`)
+    }
+
+    lowerCaseFileLoaders[extensionLower] = parser
+  }
+
+  const compiledFileLoaders = { ...extensionToParserMapping, ...lowerCaseFileLoaders } as FileLoaders
+
+  fileLoaderCache.set(fileLoaders, compiledFileLoaders)
+
+  return compiledFileLoaders
+}
+
+export const parseFile = (
+  filePath: string,
+  fileLoaders: FileLoaders,
+): Record<string, unknown> => {
   const filename = path.basename(filePath, path.extname(filePath))
-  const extension = path.extname(filePath).substring(1)
+  const extension = path.extname(filePath).substring(1).toLowerCase()
 
   if (!extension) {
     throw new Error(`Could not determine extension of file ${filePath}`)
   }
 
-  const parser = extensionToParserMapping[extension]
+  const combinedFileLoaders = compileFileLoaders(fileLoaders)
+
+  const parser = combinedFileLoaders[extension]
 
   if (!parser) {
     throw new Error(`No parser for extension ${extension}`)

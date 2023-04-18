@@ -5,6 +5,8 @@
 import axios from 'axios'
 import cf, { BaseType } from '../../src'
 
+import { customParsers } from './customParsers'
+
 // ? Custom schema type
 class URLType extends BaseType<string> {
   validate(value: unknown): string {
@@ -59,10 +61,6 @@ const configSchema = {
 
   // ? Lists
   report: {
-    creds: cf.asStruct({
-      user: cf.asString(),
-      password: cf.asString(),
-    }),
     fields: cf.asList(cf.asString()),
     credentials: cf.asList(
       cf.asStruct({
@@ -73,7 +71,12 @@ const configSchema = {
   },
 }
 
-const myConfig = cf.compile(configSchema)
+const myConfig = cf.compile(
+  configSchema,
+  {
+    fileLoaders: customParsers
+  }
+)
 
 console.log('Struct:', myConfig.report.getSync())
 

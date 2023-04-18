@@ -1,4 +1,4 @@
-import  { compile }  from './compiler'
+import  { ConfMonOptions, compile }  from './compiler'
 import  { Schema }  from './compiler/types'
 
 import {
@@ -14,6 +14,7 @@ import {
 
 export {
   BaseType,
+  ConfMonOptions,
 }
 
 export default {

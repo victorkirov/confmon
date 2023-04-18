@@ -1,4 +1,4 @@
-# ConfMon &middot; [![GitHub license](https://img.shields.io/badge/license-GNU-blue.svg)](https://github.com/victorkirov/confmon/blob/main/LICENSE) [![npm version](https://img.shields.io/npm/v/confmon.svg?style=flat)](https://www.npmjs.com/package/confmon)
+# ConfMon &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/victorkirov/confmon/blob/main/LICENSE) [![npm version](https://img.shields.io/npm/v/confmon.svg?style=flat)](https://www.npmjs.com/package/confmon)
 
 ConfMon loads configuration from a variety of files and custom sources and combines them into one global object. It then monitors those files for changes and allows the user to subscribe to change events on any node in the configuration, so that the software can react to configuration changes without a restart.
 
@@ -8,9 +8,8 @@ Please note, this library is still in alpha phase, so the interface and usage ca
 
 ## TODOS to get to beta
 - Do the TODO comments
-- Improve typing and remove as many castings to `any` as possible
 - Tests, tests, tests
-- Figure out when errors are thrown and how they should be handled
+- Figure out when errors are thrown and how they should be handled... e.g. remove a required field from config files and error is thrown
 
 ## Contents
 - [Why ConfMon?](#why-confmon)
@@ -18,6 +17,8 @@ Please note, this library is still in alpha phase, so the interface and usage ca
 - [Config files](#config-files)
   - [**Direct value files with .confval files**](#direct-value-files-with-confval-files)
   - [**Loading environment variables**](#loading-environment-variables)
+- [Compile Options](#compile-options)
+  - [**Custom config directory**](#custom-config-directory)
   - [**Custom file loaders**](#custom-file-loaders)
 - [Building a config schema](#building-a-config-schema)
   - [**Reserved Keys**](#reserved-keys)
@@ -37,12 +38,12 @@ ConfMon was designed with 2 main requirements in mind.
 
 ## Quick start
 **Step 1 -  Import ConfMon module**
-```javascript
+```typescript
 import cf from 'confmon'
 ```
 
 **Step 2 -  Define your schema**
-```javascript
+```typescript
 const configSchema = {
   server: {
     host: cf.asString().required(),
@@ -54,12 +55,12 @@ const configSchema = {
 ```
 
 **Step 3 - Compile your config instance from the schema**
-```javascript
+```typescript
 const myConfig = cf.compile(configSchema)
 ```
 
 **Step 4 - Use your config**
-```javascript
+```typescript
 const host = myConfig.server.host.getSync()
 // typescript will automatically see `typeof host` as a string
 
@@ -82,14 +83,14 @@ const entireConfig = await myConfig
 ```
 
 **Step 5 - Setup change listeners**
-```javascript
+```typescript
 myConfig.server.confListen(newServerValue => console.log('Server changed: ', newServerValue))
 ```
 
 ## Config files
-Configuration files should exist in a single directory. They can be in any of the following formats: `json`, `json5`, `hjson`, `cson`, `toml`, `yaml`, `xml`, and `ini`. A custom extension, `confval`, was also implemented and is described [below](#direct-value-files-with-confval-files). You are also able to add your own, custom file loaders to handle other file formats, as describe [below](#custom-file-loaders).
+Configuration files should exist in a single directory. They can be in the `json` format by default or you can specify custom file loaders and use other formats (see [**Custom file loaders**](#custom-file-loaders)). A custom extension, `confval`, was also implemented and is described [below](#direct-value-files-with-confval-files). You are also able to add your own, custom file loaders to handle other file formats, as describe [below](#custom-file-loaders).
 
-By default, the configuration directory is located at `<working_directory>/config`. This can be set to a relative path from the working directory, or to an absolute path by setting the `CONFMON_PATH` environment variable.
+By default, the configuration directory is located at `<working_directory>/config`. This can be set to a relative path from the working directory, or to an absolute path by setting the `configDirectory` in the options argument given to the compiler.
 
 Files in the config directory are loaded alphabetically with a lexicographical ordering and merged in that order. This means that a value defined in a file will be overwritten if it exists in a file with a later lexicographical filename.
 
@@ -99,7 +100,7 @@ If you have a file which fully contains the value of a node in your schema (e.g.
 Example:
 
 With the below schema:
-```javascript
+```typescript
 const schema = {
   database: {
     credentials: {
@@ -121,7 +122,7 @@ To load configuration from environment variables as specified in a file, we can 
 Example:
 
 With the below schema:
-```javascript
+```typescript
 const schema = {
   database: {
     credentials: {
@@ -139,8 +140,65 @@ database:
     password: ${DB_PASS}
 ```
 
+## **Compile Options**
+
+There are a few options that can be configured when compiling a schema using confmon and they are optionally passed in as the second argument to the compile function.
+
+### **Custom config directory**
+By default, confmon loads files from a file called `config` in the current working directory. This can be changed by setting the `configDirectory` field in the options object passed to the compile function. The custom config directory can be either an absolute path or a path relative to the working directory.
+
+Example:
+To load files from `{cwd}/data/config`.
+```typescript
+import cf from 'confmon'
+import toml from 'toml'
+
+const mySchema = {
+  database: {
+    host: cf.asString().default('localhost'),
+    credentials: {
+      username: cf.asString().required(),
+      password: cf.asString().required()
+    }
+  }
+}
+
+const confOptions = {
+  configDirectory: './data/config'
+}
+
+cf.compile(mySchema, confOptions)
+```
+
 ### **Custom file loaders**
-TODO
+By default, confmon only loads json and confval files. This can be expanded to load any file type by using a custom loader whcih takes the string value of the configuration file and outputs a parsed object.
+
+Custom loaders can be passed to confmon in the configuration options, under the `fileLoaders` field, when a schema is compiled. The `fileLoaders` field is a Record with the key being the extension (without the dot) and the value being the parser function which takes in the data as a string (the contents of the file) and an optional second argument of the filename.
+
+Example:
+To load .toml files, install the `toml` package (`npm i toml`) and set up a toml parser as shown below.
+```typescript
+import cf from 'confmon'
+import toml from 'toml'
+
+const mySchema = {
+  database: {
+    host: cf.asString().default('localhost'),
+    credentials: {
+      username: cf.asString().required(),
+      password: cf.asString().required()
+    }
+  }
+}
+
+const confOptions = {
+  fileLoaders: {
+    toml: toml.parse
+  }
+}
+
+cf.compile(mySchema, confOptions)
+```
 
 ## Building a config schema
 In order to allow Typescript to work its magic, we need to define the schema of the configuration that we are expecting. There are a variety of schema types which ConfMon exposes, and you can also create your own [custom](#custom-schema-types) ones.
@@ -148,7 +206,7 @@ In order to allow Typescript to work its magic, we need to define the schema of 
 When building a schema, you will need to define the structure of your configuration data using a javascript object whose leaf nodes are ConfMon schema objects.
 
 Example:
-```javascript
+```typescript
 import cf from 'confmon'
 
 const mySchema = {
@@ -194,7 +252,7 @@ afterCall:
   then: 42
 ```
 The schema could be defined as
-```javascript
+```typescript
 const mySchema = {
   afterCall: {
     thenDo: cf.asNumber().fromKey('then')
@@ -209,7 +267,7 @@ Note:
 These are just examples and possibly not the best way to implement global log levels, for example. An alternative approach could be to have a global Kubernetes ConfigMap which is mounted into the config folder for all of your deployments. You could have no log level specified by default allowing service to specify their own defaults, but if you had to debug an issue throughout all your services, you could update that config-map with 'INFO' or 'DEBUG' for the log level. There are many ways to skin a fish, the below is just one of them.
 
 Example:
-```javascript
+```typescript
 import cf from 'confmon'
 import axios from 'axios'
 
@@ -235,7 +293,7 @@ Config values containing lists are supported. The type of item in the list is de
 If multiple sources define the values of the list, the source which is loaded last will fully define the contents of the list (i.e. lists are not merged form multiple sources).
 
 Example:
-```javascript
+```typescript
 import cf from 'confmon'
 import axios from 'axios'
 
@@ -262,7 +320,7 @@ To do this, you will need to import the `BaseType` abstract class and create a c
 
 Example:
 If we want to create a custom Email schema type accepting email addresses from only the ACME INC. domain, we can define a new schema type and use it as follows:
-```javascript
+```typescript
 import cf, { BaseType } from 'confmon'
 
 const acmeEmailRX = /^[a-zA-Z0-9\.\-+]+@acme\.com$/
@@ -295,7 +353,7 @@ For base nodes in the schema where the values are pulled from a file, using the 
 Nodes which specify a `.from(<from_func>)` source and are retrieved in a custom manner, **could result in different values for the sync and async retrieval methods, especially on startup.** This is because the config compilation is done synchronously for file sources but in a promise or custom sources. For custom source nodes, it is recommended to use the asynchronous retrieval or to setup a listener for value changes.
 
 This example illustrates the issue:
-```javascript
+```typescript
 import cf from 'confmon'
 import axios from 'axios'
 
@@ -322,7 +380,7 @@ config.logLevel.then(logLevelValue => console.log(logLevelValue))
 Once a schema is compiled into a config object, you can retrieve any part of the config by calling `getSync()` on the required node. Please see the caveat when using this method [above](#querying-values-from-a-compiled-configuration).
 
 Example:
-```javascript
+```typescript
 import cf from 'confmon'
 
 const mySchema = {
@@ -349,7 +407,7 @@ const databaseHost = config.database.host.getSync()
 Once a schema is compiled into a config object, you can retrieve any part of the config by awaiting the node you require as if it was a promise. You can either await it, or call `.then(<cb>)` as with any other promise.
 
 Example:
-```javascript
+```typescript
 import cf from 'confmon'
 
 const mySchema = {
@@ -382,7 +440,7 @@ config.then(entireConfig => {
 ### **Subscribing to/unsubscribing from change events**
 Apart from retrieving config values, we want to be able to react to changes in the values, so we need to know when a config value has changed. We can do this by adding a listener to any node in the config with a callback function which handles the change. This is done by calling the `.confListen(<callback>)` function on any node in the compiled config.
 
-```javascript
+```typescript
 import cf from 'confmon'
 import knex from 'knex'
 
@@ -416,7 +474,7 @@ config.dateFormat.confListen((newFormat, oldFormat) => {
 
 It may also be useful to unsubscribe a listener from a node. This can be done in one of 2 ways. Either we keep an instance of the callback function and call `.confRemoveListener(c<callback>)` on the node that has the listener attached, or we call returned value from the `confListen()` function.
 
-```javascript
+```typescript
 let knexConnection = knex(knexConfig)
 
 const callback = (newConfig) => {
