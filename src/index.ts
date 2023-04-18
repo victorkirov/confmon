@@ -1,21 +1,9 @@
-import  { ConfMonOptions, compile }  from './compiler'
-import  { Schema }  from './compiler/types'
+import { ConfMonOptions, compile } from './compiler'
+import { Schema } from './compiler/types'
 
-import {
-  BaseType,
-  EnumType,
-  ListType,
-  NumberType,
-  ObjectType,
-  PortType,
-  StringType,
-  StructType,
-} from './fieldTypes'
+import { BaseType, EnumType, ListType, NumberType, ObjectType, PortType, StringType, StructType } from './fieldTypes'
 
-export {
-  BaseType,
-  ConfMonOptions,
-}
+export { BaseType, ConfMonOptions }
 
 export default {
   compile,

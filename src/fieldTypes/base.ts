@@ -48,7 +48,8 @@ export abstract class BaseType<T> {
   }
 
   from<BT extends this & { required: never; fromKey: never }>(
-    fromFunc: () => Promise<T> | T, options?: FromFuncOptions,
+    fromFunc: () => Promise<T> | T,
+    options?: FromFuncOptions,
   ): BT {
     this.ejectedGate()
 
@@ -58,9 +59,7 @@ export abstract class BaseType<T> {
     return this as unknown as BT
   }
 
-  fromKey<BT extends this & { from: never }>(
-    key: string,
-  ): BT {
+  fromKey<BT extends this & { from: never }>(key: string): BT {
     this.ejectedGate()
 
     this.options.fromKey = key
@@ -75,12 +74,10 @@ export abstract class BaseType<T> {
   }
 
   /** @internal */
-  subscribe(_onChangeCallback: (newValue: T) => void): void {
-  }
+  subscribe(_onChangeCallback: (newValue: T) => void): void {}
 
   /** @internal */
-  unsubscribe(_onChangeCallback: (newValue: T) => void): void {
-  }
+  unsubscribe(_onChangeCallback: (newValue: T) => void): void {}
 
   /** @internal */
   abstract validate(_value: unknown): T

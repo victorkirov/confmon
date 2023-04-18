@@ -4,8 +4,7 @@
 /node_modules/
 .eslintrc
 .gitignore
-eslintRules.js
-jest.config.js
+jest.config.ts
 pnpm-lock.yaml
 tsconfig.json
 tsconfig.build.json

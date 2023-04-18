@@ -20,7 +20,7 @@ export class ListType<T extends BaseType<unknown>> extends BaseType<(T extends B
   }
 
   /** @internal */
-  eject(): TypeOptions<(T extends BaseType<infer U> ? U : never)[]>  {
+  eject(): TypeOptions<(T extends BaseType<infer U> ? U : never)[]> {
     this.itemType.eject()
 
     return super.eject()

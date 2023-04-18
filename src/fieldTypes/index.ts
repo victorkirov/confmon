@@ -9,12 +9,4 @@ import { StructType } from './struct'
 
 export type AllTypes = NumberType | PortType | StringType | ObjectType
 
-export {
-  EnumType,
-  ListType,
-  NumberType,
-  ObjectType,
-  PortType,
-  StringType,
-  StructType,
-}
+export { EnumType, ListType, NumberType, ObjectType, PortType, StringType, StructType }

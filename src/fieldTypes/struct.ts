@@ -22,7 +22,7 @@ export class StructType<T extends Schema> extends BaseType<ExtractSchemaAsPrimit
   }
 
   /** @internal */
-  eject(): TypeOptions<ExtractSchemaAsPrimitives<T>>  {
+  eject(): TypeOptions<ExtractSchemaAsPrimitives<T>> {
     this.config = compileConfig(this.schema)
 
     return super.eject()

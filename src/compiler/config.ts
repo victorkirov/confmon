@@ -25,9 +25,7 @@ abstract class BaseSubscribablePromiseHandler<T> {
 
   then(
     this: BaseSubscribablePromiseHandler<T>,
-    callback: (
-      (value: T) => T | PromiseLike<T>
-    ) | null | undefined,
+    callback: ((value: T) => T | PromiseLike<T>) | null | undefined,
   ): PromiseLike<T> {
     const getValuePromise = this.__getValue()
 
@@ -36,10 +34,7 @@ abstract class BaseSubscribablePromiseHandler<T> {
     return getValuePromise
   }
 
-  confListen(
-    onChangeCallback: (newValue: T) => void,
-    options?: ListenOptions,
-  ): () => void {
+  confListen(onChangeCallback: (newValue: T) => void, options?: ListenOptions): () => void {
     this.__emitter.on('change', onChangeCallback)
 
     if (options?.callOnInit) {
@@ -67,7 +62,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
   private parent: ConfigBranchNode<any> | undefined
 
-  constructor(typeController:  T, parent?: ConfigBranchNode<any>) {
+  constructor(typeController: T, parent?: ConfigBranchNode<any>) {
     super()
 
     this.parent = parent
@@ -76,9 +71,10 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
     if (this.typeOptions.fromFunc) {
       // TODO: Improve this and add error handling
-      const callFromFunc = () => new Promise(resolve =>{
-        resolve(this.typeOptions.fromFunc?.())
-      }).then(value => this.__applyValueInternal(value, true))
+      const callFromFunc = () =>
+        new Promise(resolve => {
+          resolve(this.typeOptions.fromFunc?.())
+        }).then(value => this.__applyValueInternal(value, true))
 
       this.retrievePromise = callFromFunc()
 
@@ -100,10 +96,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   }
 
   getSync(): U {
-    if (
-      (this.value === undefined || this.value === null)
-      && this.typeOptions.defaultValue
-    ) {
+    if ((this.value === undefined || this.value === null) && this.typeOptions.defaultValue) {
       return this.typeOptions.defaultValue
     }
 
@@ -119,7 +112,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
   }
 
   /** @internal */
-  __applyValueInternal(newValue: unknown, fromFunc = false): void {
+  __applyValueInternal(newValue: unknown, fromFromFunc = false): void {
     if (this.value === newValue) return
 
     if (newValue === null || newValue === undefined) {
@@ -134,7 +127,11 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
     this.__emitter.emit('change', this.value)
 
-    if (fromFunc && this.parent) this.parent.__notifyChange()
+    if (fromFromFunc && this.parent) {
+      // We only notify parent of a change if the change came form a fromFunc
+      // Any change other than that would come form the parent itself and the parent would notify of changes itself
+      this.parent.__notifyChange()
+    }
   }
 
   /** @internal */
@@ -162,11 +159,11 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
 export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseHandler<ExtractSchemaAsPrimitives<T>> {
   __children: {
-    [K in keyof T]: T[K] extends Schema ?
-      ConfigBranchNode<T[K]>
-      : T[K] extends BaseType<infer U> ?
-        ConfigLeafNode<U, BaseType<U>>
-        : never
+    [K in keyof T]: T[K] extends Schema
+      ? ConfigBranchNode<T[K]>
+      : T[K] extends BaseType<infer U>
+      ? ConfigLeafNode<U, BaseType<U>>
+      : never
   }
 
   private __value!: ExtractSchemaAsPrimitives<T>
@@ -186,13 +183,11 @@ export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseH
       } else {
         this.__children[key] = new ConfigBranchNode(child, this) as any
       }
-      Object.defineProperty(
-        this,
-        key,
-        {
-          get: function () { return this.__children[key] },
+      Object.defineProperty(this, key, {
+        get: function () {
+          return this.__children[key]
         },
-      )
+      })
     }
   }
 
@@ -232,7 +227,7 @@ export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseH
 
       for (const key of Object.keys(this.__children) as (keyof T)[]) {
         const child = this.__children[key]
-        const lookupKey = child.__getOverrideKey() ?? key  as keyof T
+        const lookupKey = child.__getOverrideKey() ?? (key as keyof T)
         child.__applyValue(newValue[lookupKey])
 
         notifyValue[key] = child.getSync()
