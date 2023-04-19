@@ -19,6 +19,10 @@ const parseVal = (stringData: string, filename: string): Record<string, unknown>
   let current = parsedConfig
 
   for (const breadcrumb of breadcrumbs) {
+    if (!breadcrumb) {
+      throw new Error(`Invalid filename for .confval extension: ${filename}`)
+    }
+
     if (!(breadcrumb in current)) {
       current[breadcrumb] = {}
     }
@@ -50,9 +54,7 @@ const processEnv = <T extends Record<string, unknown>>(config: T): T => {
       const match = value.match(/^\$\{(.*)\}$/)
       if (match && match[1]) {
         const envKey = match[1]
-        if (process.env[envKey]) {
-          envConfig[key] = process.env[envKey] as any
-        }
+        envConfig[key] = process.env[envKey] as any
       } else {
         envConfig[key] = value
       }
@@ -112,7 +114,7 @@ export const parseFile = (filePath: string, fileLoaders: FileLoaders): Record<st
 
   const parsedData = parser(data, filename)
 
-  if (filename.endsWith('.env')) {
+  if (filename.toLowerCase().endsWith('.env')) {
     return processEnv(parsedData)
   }
 

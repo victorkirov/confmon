@@ -4,6 +4,6 @@ module.exports = {
   collectCoverageFrom: ['src/**/*.ts'],
   testRegex: '/src/.*\\.(test|Test)?\\.(ts)$',
   moduleFileExtensions: ['js', 'ts'],
-  coverageReporters: ['json', 'html'],
+  coverageReporters: ['text'],
   setupFilesAfterEnv: ['jest-extended'],
 }
