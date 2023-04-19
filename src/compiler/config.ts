@@ -3,7 +3,7 @@ import { BaseType, TypeOptions } from '../fieldTypes'
 
 import { ExtractSchemaAsPrimitives, ListenOptions, Schema } from './types'
 
-abstract class BaseSubscribablePromiseHandler<T> {
+export abstract class BaseSubscribablePromiseHandler<T> {
   /** @internal */
   abstract __getValue(): Promise<T>
   /** @internal */
@@ -25,7 +25,7 @@ abstract class BaseSubscribablePromiseHandler<T> {
 
   then(
     this: BaseSubscribablePromiseHandler<T>,
-    callback: ((value: T) => T | PromiseLike<T>) | null | undefined,
+    callback?: ((value: T) => T | PromiseLike<T>) | null | undefined,
   ): PromiseLike<T> {
     const getValuePromise = this.__getValue()
 
@@ -51,7 +51,7 @@ abstract class BaseSubscribablePromiseHandler<T> {
   }
 }
 
-class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHandler<U> {
+export class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHandler<U> {
   private typeController: T
 
   private typeOptions: TypeOptions<U>
@@ -80,6 +80,7 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
       if (this.typeOptions.fromFuncOptions?.pollInterval) {
         setInterval(async () => {
+          if (this.retrievePromise) await this.retrievePromise
           this.retrievePromise = callFromFunc()
         }, this.typeOptions.fromFuncOptions.pollInterval)
       }
@@ -113,13 +114,13 @@ class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePromiseHa
 
   /** @internal */
   __applyValueInternal(newValue: unknown, fromFromFunc = false): void {
+    if ((newValue === null || newValue === undefined) && this.__isRequired()) {
+      throw new Error('Config value is required')
+    }
+
     if (this.value === newValue) return
 
     if (newValue === null || newValue === undefined) {
-      if (this.typeOptions.isRequired) {
-        throw new Error('Config value is required')
-      }
-
       this.value = newValue as unknown as U
     } else {
       this.value = this.typeController.validate(newValue)
