@@ -135,7 +135,7 @@ describe('parseFile', () => {
 
     expect(fsDirSpy).toHaveBeenCalledWith('/tmp')
     expect(fsFileSpy).toHaveBeenCalledWith('/tmp/config.json', 'utf-8')
-    expect(await config).toMatchObject(testValue)
+    expect(await config).toEqual(testValue)
   })
 
   it('picks up changes on a JSON file', async () => {
@@ -174,7 +174,7 @@ describe('parseFile', () => {
 
     expect(fsDirSpy).toHaveBeenCalledWith('/tmp')
     expect(fsFileSpy).toHaveBeenCalledWith('/tmp/config.json', 'utf-8')
-    expect(await config).toMatchObject(testValue)
+    expect(await config).toEqual(testValue)
 
     expect(parentListener).not.toHaveBeenCalled()
     expect(childListener).not.toHaveBeenCalled()
@@ -191,7 +191,7 @@ describe('parseFile', () => {
     triggerFileWatcher!('change', '/tmp/config.json')
 
     expect(fsFileSpy).toHaveBeenCalledWith('/tmp/config.json', 'utf-8')
-    expect(await config).toMatchObject(testValue)
+    expect(await config).toEqual(testValue)
 
     expect(parentListener).not.toHaveBeenCalled()
     expect(childListener).not.toHaveBeenCalled()
@@ -211,7 +211,7 @@ describe('parseFile', () => {
     triggerFileWatcher!('change', '/tmp/config.json')
 
     expect(fsFileSpy).toHaveBeenCalledWith('/tmp/config.json', 'utf-8')
-    expect(await config).toMatchObject(testValueUpdates)
+    expect(await config).toEqual(testValueUpdates)
 
     expect(parentListener).toHaveBeenCalledTimes(1)
     expect(childListener).toHaveBeenCalledTimes(1)
@@ -235,7 +235,7 @@ describe('parseFile', () => {
     triggerFileWatcher!('change', '/tmp/config.json')
 
     expect(fsFileSpy).toHaveBeenCalledWith('/tmp/config.json', 'utf-8')
-    expect(await config).toMatchObject(testValueUpdatesStruct)
+    expect(await config).toEqual(testValueUpdatesStruct)
 
     expect(parentListener).toHaveBeenCalledTimes(1)
     expect(childListener).toHaveBeenCalledTimes(1)

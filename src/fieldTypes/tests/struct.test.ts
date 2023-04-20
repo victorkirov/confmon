@@ -29,10 +29,11 @@ describe('StructType', () => {
     )
   })
 
-  it('should subscribe to changes', () => {
+  it('should subscribe to changes of fromFunc in child schema', async () => {
     const schema = {
       name: new StringType(),
       age: new NumberType().default(18),
+      funcField: new NumberType().from(() => 123),
     }
     const structType = new StructType(schema)
     structType.eject()
@@ -41,9 +42,17 @@ describe('StructType', () => {
     structType.subscribe(onChangeCallback)
 
     const value = { name: 'John', age: 30 }
-    structType.validate(value)
+    const validatedValue = structType.validate(value)
 
-    expect(onChangeCallback).toHaveBeenCalledWith(value)
+    expect(validatedValue).toEqual({ name: 'John', age: 30, funcField: undefined })
+
+    // We only want the subscribed callback to fire on internal config changes, not from external changes
+    expect(onChangeCallback).not.toHaveBeenCalled()
+
+    // we await till next tick here so that the formFunc promise can fire and resolve
+    await new Promise(process.nextTick)
+
+    expect(onChangeCallback).toHaveBeenCalledWith({ name: 'John', age: 30, funcField: 123 })
   })
 
   it('should unsubscribe from changes', () => {
