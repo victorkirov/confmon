@@ -3,6 +3,10 @@ import fs from 'fs'
 import { parseFile } from '../parser'
 
 describe('parseFile', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   it('throws for files with no extensions', () => {
     const filePath = '/tmp/parserConfig'
 
@@ -11,50 +15,61 @@ describe('parseFile', () => {
 
   it('parses a JSON file', () => {
     const filePath = '/tmp/parserConfig.json'
-    fs.writeFileSync(filePath, '{"fieldName": 1}')
+    const fsSpy = jest.spyOn(fs, 'readFileSync')
+    fsSpy.mockImplementation(() => '{"fieldName": 1}')
 
     const result = parseFile(filePath, {})
 
     expect(result).toEqual({ fieldName: 1 })
+    expect(fsSpy).toBeCalledWith(filePath, 'utf-8')
   })
 
   it('parses a .confval file', () => {
     const filePath = '/tmp/fieldName.confval'
-    fs.writeFileSync(filePath, 'a string value')
+    const fsSpy = jest.spyOn(fs, 'readFileSync')
+    fsSpy.mockImplementation(() => 'a string value')
 
     const result = parseFile(filePath, {})
 
     expect(result).toEqual({ fieldName: 'a string value' })
+    expect(fsSpy).toBeCalledWith(filePath, 'utf-8')
   })
 
   it('parses an object .confval file', () => {
     const filePath = '/tmp/parent|child|fieldName.confval'
-    fs.writeFileSync(filePath, 'a string value')
+    const fsSpy = jest.spyOn(fs, 'readFileSync')
+    fsSpy.mockImplementation(() => 'a string value')
 
     const result = parseFile(filePath, {})
 
     expect(result).toEqual({ parent: { child: { fieldName: 'a string value' } } })
+    expect(fsSpy).toBeCalledWith(filePath, 'utf-8')
   })
 
   it('object .confval file without field name throws error', () => {
     const filePath = '/tmp/parent|child|.confval'
-    fs.writeFileSync(filePath, 'a string value')
+    const fsSpy = jest.spyOn(fs, 'readFileSync')
+    fsSpy.mockImplementation(() => 'a string value')
 
     expect(() => parseFile(filePath, {})).toThrowError('Invalid filename for .confval extension: parent|child|')
+    expect(fsSpy).toBeCalledWith(filePath, 'utf-8')
   })
 
   it('object .confval file with invalid name throws error', () => {
     const filePath = '/tmp/parent||fieldName.confval'
-    fs.writeFileSync(filePath, 'a string value')
+    const fsSpy = jest.spyOn(fs, 'readFileSync')
+    fsSpy.mockImplementation(() => 'a string value')
 
     expect(() => parseFile(filePath, {})).toThrowError('Invalid filename for .confval extension: parent||fieldName')
+    expect(fsSpy).toBeCalledWith(filePath, 'utf-8')
   })
 
   it('processes .env files', () => {
     const filePath = '/tmp/parserConfig.env.json'
-    fs.writeFileSync(
-      filePath,
-      '{"fieldName": "${TEST_ENV_VAR}", "nonEnvField": "Bob", "nonStringField": 5, "child": { "innerFieldName": "${INNER_TEST_ENV_VAR}"} }',
+    const fsSpy = jest.spyOn(fs, 'readFileSync')
+    fsSpy.mockImplementation(
+      () =>
+        '{"fieldName": "${TEST_ENV_VAR}", "nonEnvField": "Bob", "nonStringField": 5, "child": { "innerFieldName": "${INNER_TEST_ENV_VAR}"} }',
     )
 
     const emptyResult = parseFile(filePath, {})
@@ -85,7 +100,8 @@ describe('parseFile', () => {
 
   it('allows for custom parsers', () => {
     const filePathStr = '/tmp/parserConfig.customString'
-    fs.writeFileSync(filePathStr, 'a string value')
+    const fsSpy = jest.spyOn(fs, 'readFileSync')
+    fsSpy.mockImplementation(() => 'a string value')
 
     const fileLoaders = {
       customString: (stringData: string) => ({ stringVal: stringData }),
@@ -97,7 +113,7 @@ describe('parseFile', () => {
     expect(resultStr).toEqual({ stringVal: 'a string value' })
 
     const filePathNum = '/tmp/parserConfig.customNumber'
-    fs.writeFileSync(filePathNum, '5')
+    fsSpy.mockImplementation(() => '5')
 
     const result = parseFile(filePathNum, fileLoaders)
 
