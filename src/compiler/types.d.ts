@@ -57,17 +57,8 @@ type ExpandSubscribableType<T> = T extends Primitive
   : never
 
 type Subscribable<T> = PromiseLike<ExpandSubscribableType<T>> & {
-  confListen: (
-    callback: (
-      newValue: ExpandSubscribableType<T>,
-      // TODO: Make oldValue work
-      oldValue: ExpandSubscribableType<T>,
-    ) => void,
-    options?: ListenOptions,
-  ) => UnsubscribeFunction
-  confRemoveListener: (
-    callback: (newValue: ExpandSubscribableType<T>, oldValue: ExpandSubscribableType<T>) => void,
-  ) => void
+  confListen: (callback: (newValue: ExpandSubscribableType<T>) => void, options?: ListenOptions) => UnsubscribeFunction
+  confRemoveListener: (callback: (newValue: ExpandSubscribableType<T>) => void) => void
   getSync: () => ExpandSubscribableType<T>
 }
 

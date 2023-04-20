@@ -98,8 +98,7 @@ const stopServerListener = myConfig.server.confListen(newServerValue => console.
 myConfig.catFacts.confListen(newCatFactsValue => console.log('Cat facts changed:', newCatFactsValue))
 myConfig.report.confListen(newStruct => console.log('Struct changed:', newStruct))
 
-const onLogChangeCallback = (newLogLevel: string, oldLogLevel: string) =>
-  console.log('Log level changed from <', oldLogLevel, '> to <', newLogLevel, '>')
+const onLogChangeCallback = (newLogLevel: string) => console.log('Log level changed to <', newLogLevel, '>')
 myConfig.logging.level.confListen(onLogChangeCallback)
 
 // ? Make the server and log level listeners stop listening for changes 20 seconds after application starts up
