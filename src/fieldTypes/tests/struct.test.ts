@@ -25,7 +25,7 @@ describe('StructType', () => {
 
     const value = { name: 123, age: 123 }
     expect(() => structType.validate(value)).toThrow(
-      `StructType must be a valid object. Reason: StringType must be a string`,
+      `StructType must be a valid object. Reason: Error applying value for key "name": StringType must be a string`,
     )
   })
 

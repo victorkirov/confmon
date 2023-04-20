@@ -73,7 +73,7 @@ export class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePr
       // TODO: Improve this and add error handling
       const callFromFunc = () =>
         new Promise(resolve => {
-          resolve(this.typeOptions.fromFunc?.())
+          resolve(this.typeOptions.fromFunc!())
         }).then(value => this.__applyValueInternal(value, true))
 
       this.retrievePromise = callFromFunc()
@@ -212,7 +212,7 @@ export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseH
 
     for (const key of keys) {
       if (!(key in value) && this.__children[key].__isRequired()) {
-        throw new Error(`Key ${String(key)} missing in config object ${JSON.stringify(value)}`)
+        throw new Error(`Key "${String(key)}" missing in config object ${JSON.stringify(value)}`)
       }
     }
 
@@ -221,15 +221,25 @@ export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseH
 
   /** @internal */
   __applyValue(newValue: unknown): void {
+    if (this.__isRequired() && (newValue === null || newValue === undefined)) {
+      throw new Error('Config value is required')
+    }
+
     if (newValue === this.__value) return
 
-    if (this.__validateValueHasExpectedStructure(newValue)) {
+    if (newValue === null || newValue === undefined || this.__validateValueHasExpectedStructure(newValue)) {
       const notifyValue: Partial<Record<keyof T, unknown>> = {}
 
       for (const key of Object.keys(this.__children) as (keyof T)[]) {
         const child = this.__children[key]
         const lookupKey = child.__getOverrideKey() ?? (key as keyof T)
-        child.__applyValue(newValue[lookupKey])
+
+        try {
+          child.__applyValue(newValue?.[lookupKey])
+        } catch (error) {
+          const err = error as Error
+          throw new Error(`Error applying value for key "${String(key)}": ${err.message}`)
+        }
 
         notifyValue[key] = child.getSync()
       }
