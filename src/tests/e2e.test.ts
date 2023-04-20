@@ -62,6 +62,21 @@ describe('parseFile', () => {
     expect(await config.parent.child.fieldNumDefault).toBe(1)
   })
 
+  it('uses default config directory if custom not specified', async () => {
+    jest.useFakeTimers()
+
+    jest.spyOn(fs, 'watch').mockImplementation(() => jest.fn() as unknown as FSWatcher)
+
+    const fsDirSpy = jest.spyOn(fs, 'readdirSync')
+    fsDirSpy.mockImplementation(() => [])
+
+    const schema = createTestSchema()
+
+    confmon.compile(schema)
+
+    expect(fsDirSpy).toHaveBeenCalledWith('./config')
+  })
+
   it('throws if required field not set', async () => {
     jest.useFakeTimers()
 
@@ -242,5 +257,29 @@ describe('parseFile', () => {
     expect(unchangingFieldListener).not.toHaveBeenCalled()
     expect(fieldListener).not.toHaveBeenCalled()
     expect(structFieldListener).toHaveBeenCalledTimes(1)
+  })
+
+  it('parses using a custom parser', async () => {
+    jest.useFakeTimers()
+
+    jest.spyOn(fs, 'watch').mockImplementation(() => jest.fn() as unknown as FSWatcher)
+
+    const fsDirSpy = jest.spyOn(fs, 'readdirSync')
+    fsDirSpy.mockImplementation(() => ['config.toml'] as any)
+
+    const testValue = createTestValues()
+    const fsFileSpy = jest.spyOn(fs, 'readFileSync')
+    fsFileSpy.mockImplementation(() => 'fileContents')
+
+    const schema = createTestSchema()
+
+    const tomlParser = jest.fn()
+    tomlParser.mockReturnValue(testValue)
+    const config = confmon.compile(schema, { configDirectory: '/tmp', fileLoaders: { toml: tomlParser } })
+
+    expect(fsDirSpy).toHaveBeenCalledWith('/tmp')
+    expect(fsFileSpy).toHaveBeenCalledWith('/tmp/config.toml', 'utf-8')
+    expect(tomlParser).toHaveBeenCalledWith('fileContents', 'config')
+    expect(await config).toEqual(testValue)
   })
 })

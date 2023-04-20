@@ -93,7 +93,7 @@ export class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePr
 
       this.value = newValue
 
-      this.__emitter.emit('change', this.value)
+      this.__notifyChange()
       this.parent?.__notifyChange()
     })
   }
@@ -130,7 +130,7 @@ export class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePr
 
     this.lastAppliedValue = newValue
 
-    this.__emitter.emit('change', this.value)
+    this.__notifyChange()
 
     if (fromFromFunc && this.parent) {
       // We only notify parent of a change if the change came form a fromFunc

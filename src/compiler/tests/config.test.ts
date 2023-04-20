@@ -232,21 +232,20 @@ describe('configHandlers', () => {
       let counter = 1
       const innerType = confmon.asNumber().from(() => counter++, { pollInterval: 10 })
 
-      const type = confmon.asStruct({ inner: innerType })
-      const outerNode = new ConfigBranchNode({ parent: type })
+      const outerNode = new ConfigBranchNode({ parent: { child: confmon.asStruct({ inner: innerType }) } })
 
       const callback = jest.fn()
       outerNode.confListen(callback)
 
-      expect(await outerNode).toEqual({ parent: { inner: 1 } })
+      expect(await outerNode).toEqual({ parent: { child: { inner: 1 } } })
 
-      expect(callback).toHaveBeenCalledWith({ parent: { inner: 1 } })
+      expect(callback).toHaveBeenCalledWith({ parent: { child: { inner: 1 } } })
 
       jest.advanceTimersByTime(15)
 
-      expect(await outerNode).toEqual({ parent: { inner: 2 } })
+      expect(await outerNode).toEqual({ parent: { child: { inner: 2 } } })
 
-      expect(callback).toHaveBeenCalledWith({ parent: { inner: 2 } })
+      expect(callback).toHaveBeenCalledWith({ parent: { child: { inner: 2 } } })
     })
 
     it("should not emit change on parent for subscribable types if value doesn't change", async () => {
