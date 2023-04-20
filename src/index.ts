@@ -7,7 +7,7 @@ export { BaseType, ConfMonOptions }
 
 export default {
   compile,
-  asEnum: (values: string[]) => new EnumType(values),
+  asEnum: <T extends readonly string[]>(values: T) => new EnumType<T>(values),
   asString: () => new StringType(),
   asNumber: () => new NumberType(),
   asPort: () => new PortType(),

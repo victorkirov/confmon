@@ -24,6 +24,7 @@ export const compile = <T extends Schema>(
   compiledConfig.__applyValue(current)
 
   fs.watch(configDirectory, (_eventType, _filename) => {
+    // TODO: Consider only reloading the changed file
     const newConfig = reReference(current, getConfig(configDirectory, fileLoaders))
 
     if (newConfig === current) return

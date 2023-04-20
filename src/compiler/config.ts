@@ -60,6 +60,8 @@ export class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePr
 
   private value!: U
 
+  private lastAppliedValue?: unknown
+
   private parent: ConfigBranchNode<any> | undefined
 
   constructor(typeController: T, parent?: ConfigBranchNode<any>) {
@@ -118,13 +120,15 @@ export class ConfigLeafNode<U, T extends BaseType<U>> extends BaseSubscribablePr
       throw new Error('Config value is required')
     }
 
-    if (this.value === newValue) return
+    if (this.lastAppliedValue === newValue) return
 
     if (newValue === null || newValue === undefined) {
       this.value = newValue as unknown as U
     } else {
       this.value = this.typeController.validate(newValue)
     }
+
+    this.lastAppliedValue = newValue
 
     this.__emitter.emit('change', this.value)
 
@@ -167,14 +171,14 @@ export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseH
       : never
   }
 
-  private __value!: ExtractSchemaAsPrimitives<T>
+  private __lastAppliedValue?: unknown
 
-  private parent: ConfigBranchNode<any> | undefined
+  private __parent: ConfigBranchNode<any> | undefined
 
   constructor(schema: T, parent?: ConfigBranchNode<any>) {
     super()
 
-    this.parent = parent
+    this.__parent = parent
     this.__children = {} as any
 
     for (const key of Object.keys(schema) as (keyof T)[]) {
@@ -225,7 +229,7 @@ export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseH
       throw new Error('Config value is required')
     }
 
-    if (newValue === this.__value) return
+    if (newValue === this.__lastAppliedValue) return
 
     if (newValue === null || newValue === undefined || this.__validateValueHasExpectedStructure(newValue)) {
       const notifyValue: Partial<Record<keyof T, unknown>> = {}
@@ -244,7 +248,7 @@ export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseH
         notifyValue[key] = child.getSync()
       }
 
-      this.__value = newValue as unknown as ExtractSchemaAsPrimitives<T>
+      this.__lastAppliedValue = newValue as unknown as ExtractSchemaAsPrimitives<T>
 
       this.__emitter.emit('change', notifyValue)
     }
@@ -261,7 +265,7 @@ export class ConfigBranchNode<T extends Schema> extends BaseSubscribablePromiseH
 
     this.__emitter.emit('change', notifyValue)
 
-    if (this.parent) this.parent.__notifyChange()
+    if (this.__parent) this.__parent.__notifyChange()
   }
 
   /** @internal */

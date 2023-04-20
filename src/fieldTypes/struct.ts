@@ -8,6 +8,8 @@ export class StructType<T extends Schema> extends BaseType<ExtractSchemaAsPrimit
 
   private config!: ConfigBranchNode<T>
 
+  private pauseChangeEvents = false
+
   constructor(schema: T) {
     super()
     this.schema = schema
@@ -15,10 +17,13 @@ export class StructType<T extends Schema> extends BaseType<ExtractSchemaAsPrimit
 
   validate = (value: unknown): ExtractSchemaAsPrimitives<T> => {
     try {
+      this.pauseChangeEvents = true
       this.config.__applyValue(value)
     } catch (error) {
       const err = error as Error
       throw new Error(`StructType must be a valid object. Reason: ${err.message}`)
+    } finally {
+      this.pauseChangeEvents = false
     }
 
     const validatedValue = this.config.getSync()
@@ -35,7 +40,13 @@ export class StructType<T extends Schema> extends BaseType<ExtractSchemaAsPrimit
 
   /** @internal */
   subscribe(onChangeCallback: (newValue: ExtractSchemaAsPrimitives<T>) => void): void {
-    this.config.confListen(onChangeCallback)
+    const onChange = (newValue: ExtractSchemaAsPrimitives<T>): void => {
+      if (this.pauseChangeEvents) return
+
+      onChangeCallback(newValue)
+    }
+
+    this.config.confListen(onChange)
   }
 
   /** @internal */
