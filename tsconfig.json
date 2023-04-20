@@ -24,5 +24,8 @@
     "skipLibCheck": true,
     "stripInternal": true,
   },
-  "include": ["src/**/*", "jest.config.ts"]
+  "include": [
+    "src/**/*",
+    "jest.config.ts"
+  ]
 }
